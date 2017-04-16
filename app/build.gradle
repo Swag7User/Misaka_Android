@@ -3,42 +3,31 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
     defaultConfig {
+        multiDexEnabled true
         applicationId "moe.ywp.misaka"
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        jackOptions {
+            enabled true
+        }
     }
+    dexOptions {
+        javaMaxHeapSize "4g"
+        incremental true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
-repositories {
-    maven {
-        url "http://tomp2p.net/dev/mvn/"
-    }
-
-
-    dependencies {
-        compile fileTree(dir: 'libs', include: ['*.jar'])
-        androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-            exclude group: 'com.android.support', module: 'support-annotations'
-        })
-        compile 'com.android.support:appcompat-v7:23.2.1'
-        compile 'com.android.support:design:23.2.1'
-        compile 'net.tomp2p:tomp2p-all:5.0-Beta8'
-        testCompile 'junit:junit:4.12'
-    }
-}
-
-android {
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -53,4 +42,30 @@ android {
         exclude 'META-INF/INDEX.LIST'
         exclude 'META-INF/io.netty.versions.properties'
     }
+}
+repositories {
+    maven {
+        url "http://tomp2p.net/dev/mvn/"
+    }
+    maven {
+        url "https://mvnrepository.com/artifact/de.svenkubiak/jBCrypt"
+    }
+
+
+    dependencies {
+        compile fileTree(dir: 'libs', include: ['*.jar'])
+        androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+            exclude group: 'com.android.support', module: 'support-annotations'
+        })
+        compile 'com.android.support:appcompat-v7:23.2.1'
+        compile 'com.android.support:design:23.2.1'
+        compile 'net.tomp2p:tomp2p-all:5.0-Beta8'
+        compile 'de.svenkubiak:jBCrypt:0.4.1'
+        testCompile 'junit:junit:4.12'
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-v4:23.+'
+    compile 'com.google.android.gms:play-services:+'
 }
