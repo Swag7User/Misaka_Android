@@ -1,4 +1,4 @@
-//gradlew installDebug --daemon && adb shell am start -n moe.ywp.misaka/.MainActivity
+//gradlew installDebug --daemon && adb shell am start -n moe.ywp.misaka/.LoginActivity
 
 apply plugin: 'com.android.application'
 

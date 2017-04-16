@@ -4,11 +4,10 @@ package moe.ywp.misaka.helper;
  * Created by Stalin on 15/03/2017.
  */
 
+import android.content.Context;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class Password {
 
@@ -41,8 +40,9 @@ public class Password {
      * @return bool, true if password is uncommon, false if password is common
      * @throws IOException should really not happen as it checks against a hardcoded static file
      */
-    public static boolean passwordContainsTop(String password) throws IOException{
-        try (BufferedReader bReader = new BufferedReader(new InputStreamReader(Password.class.getClassLoader().getResourceAsStream("/misc/10_million_password_list_top_10000.txt")))) {
+    public static boolean passwordContainsTop(String password, Context context) throws IOException{
+        InputStream instream = context.getAssets().open("10_million_password_list_top_10000.txt");
+        try (BufferedReader bReader = new BufferedReader(new InputStreamReader(instream))) {
             String line;
             while ((line = bReader.readLine()) != null) {
                 if (line.equals(password)){

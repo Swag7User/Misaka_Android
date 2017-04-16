@@ -22,6 +22,7 @@ import moe.ywp.misaka.Userstuff.FriendsListEntry;
 import moe.ywp.misaka.Userstuff.PrivateUserProfile;
 import moe.ywp.misaka.Userstuff.PublicUserProfile;
 import moe.ywp.misaka.helper.Password;
+import moe.ywp.misaka.network.ObjectReplyHandler;
 import moe.ywp.misaka.network.P2POverlay;
 import android.util.Pair;
 import moe.ywp.misaka.helper.*;
@@ -78,11 +79,12 @@ public class LoginActivity extends AppCompatActivity
         });
 
         Button loginbtn = (Button) findViewById(R.id.loginbutton);
-        fabLog.setOnClickListener(new View.OnClickListener() {
+        loginbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 System.err.println("clicked the REAL login button");
                 if (loginCheck() == false) {
+                    System.err.println("LOGINCHECK FALSE");
                     return;
                 } else {
                     int id = getId();
@@ -103,8 +105,8 @@ public class LoginActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        String bootstrapIP = "127.0.0.1";
-
+        String bootstrapIP = "192.168.1.15";
+        System.setProperty("java.net.preferIPv6Addresses", "false");
         p2p = new P2POverlay();
 
         // Try to bootstrap yay
@@ -157,6 +159,8 @@ public class LoginActivity extends AppCompatActivity
 
         // TODO: Encrypt it with password
         if (savePrivateUserProfile() == false) {
+            System.err.println("Error. Could not save private UserProfile");
+
             return new Pair<>(false, "Error. Could not save private UserProfile");
         }
 
@@ -167,8 +171,10 @@ public class LoginActivity extends AppCompatActivity
 
         if (p2p.put(userID, publicUserProfile)) {
             login2(userID, password);
+            System.err.println("User account for user \"" + userID + "\" successfully created");
             return new Pair<>(true, "User account for user \"" + userID + "\" successfully created");
         } else {
+            System.err.println("Network DHT error. Could not save public UserProfile");
             return new Pair<>(false, "Network DHT error. Could not save public UserProfile");
         }
     }
@@ -190,7 +196,7 @@ public class LoginActivity extends AppCompatActivity
             return false;
         }
         try {
-            if (Password.passwordContainsTop(passwordField.getText().toString()) == false) {
+            if (Password.passwordContainsTop(passwordField.getText().toString(), this) == false) {
                 errorLable.setText("Password too common, please chose another one");
                 return false;
             }
@@ -210,14 +216,14 @@ public class LoginActivity extends AppCompatActivity
             this.clientIP = ip;
             this.clientId = id;
 
-            /*Pair<Boolean, String> result = login2(username, password);
+            Pair<Boolean, String> result = login2(username, password);
 
             if (result.first == false) {
                 System.err.println("NOT Loged in successfully, SOMETHING BROKE");
             } else {
                 System.err.println("Logged in A-Okay");
             }
-*/
+
 
         } catch (Exception e) {
             System.err.println("Caught Exception: " + e.getMessage());
@@ -247,6 +253,7 @@ public class LoginActivity extends AppCompatActivity
         // Get userprofile if password and username are correct
         Object getResult = p2p.getBlocking(userID + password);
         if (getResult == null) {
+            System.err.println("Login data not valid, Wrong UserID/password?");
             return new Pair<>(false, "Login data not valid, Wrong UserID/password?");
         }
 
@@ -286,7 +293,7 @@ public class LoginActivity extends AppCompatActivity
         }
 
         // Set reply handler
-      //  p2p.setObjectDataReply(new ObjectReplyHandler(this));
+        p2p.setObjectDataReply(new ObjectReplyHandler(this));
 
         // Send out online status to all friends
      //   pingAllFriends(true);
