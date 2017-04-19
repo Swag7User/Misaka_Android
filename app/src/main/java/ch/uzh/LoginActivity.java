@@ -1,4 +1,4 @@
-package moe.ywp.misaka;
+package ch.uzh;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,9 +16,9 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import moe.ywp.misaka.helper.PrivateUserProfile;
-import moe.ywp.misaka.helper.Password;
-import moe.ywp.misaka.network.P2POverlay;
+import ch.uzh.helper.PrivateUserProfile;
+import ch.uzh.helper.Password;
+import ch.uzh.helper.P2POverlay;
 import android.util.Pair;
 
 import java.io.IOException;

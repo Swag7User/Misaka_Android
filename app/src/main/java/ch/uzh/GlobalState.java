@@ -1,4 +1,4 @@
-package moe.ywp.misaka;
+package ch.uzh;
 
 /**
  * Created by Jesus on 19.04.2017.

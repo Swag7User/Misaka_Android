@@ -3,12 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package moe.ywp.misaka.network;
+package ch.uzh.helper;
 
 
-import moe.ywp.misaka.LoginActivity;
-import moe.ywp.misaka.MainActivity;
-import moe.ywp.misaka.MainWindow;
+import ch.uzh.MainWindow;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 

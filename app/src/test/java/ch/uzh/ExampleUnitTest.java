@@ -1,4 +1,4 @@
-package moe.ywp.misaka;
+package ch.uzh;
 
 import org.junit.Test;
 

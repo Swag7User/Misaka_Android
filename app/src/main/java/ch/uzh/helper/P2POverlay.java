@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package moe.ywp.misaka.network;
+package ch.uzh.helper;
 
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
@@ -22,7 +22,6 @@ import net.tomp2p.storage.Data;
 import android.util.Pair;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Random;

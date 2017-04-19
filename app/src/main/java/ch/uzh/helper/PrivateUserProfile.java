@@ -3,10 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package moe.ywp.misaka.helper;
+package ch.uzh.helper;
 
-
-import moe.ywp.misaka.network.FriendRequestMessage;
 
 import java.io.Serializable;
 import java.security.KeyPair;

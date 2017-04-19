@@ -4,9 +4,8 @@
  * and open the template in the editor.
  */
 
-package moe.ywp.misaka.helper;
+package ch.uzh.helper;
 
-import moe.ywp.misaka.network.FriendRequestMessage;
 import net.tomp2p.peers.PeerAddress;
 
 import java.io.Serializable;
@@ -23,6 +22,7 @@ public class PublicUserProfile implements Serializable {
     private String eMail;
     private PeerAddress peerAddress;
     private ArrayList<FriendRequestMessage> pendingFriendRequests;
+    private static final long serialVersionUID = 42L;
 
 
     public PublicUserProfile(String _userID, PublicKey _publicKey, PeerAddress _peerAddress) {

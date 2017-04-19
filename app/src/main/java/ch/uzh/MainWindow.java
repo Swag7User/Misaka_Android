@@ -1,14 +1,14 @@
-package moe.ywp.misaka;
+package ch.uzh;
 
 import android.util.Pair;
-import moe.ywp.misaka.helper.FriendsListEntry;
-import moe.ywp.misaka.helper.PrivateUserProfile;
-import moe.ywp.misaka.helper.PublicUserProfile;
-import moe.ywp.misaka.helper.ChatMessage;
-import moe.ywp.misaka.helper.OnlineStatusMessage;
-import moe.ywp.misaka.network.FriendRequestMessage;
-import moe.ywp.misaka.network.ObjectReplyHandler;
-import moe.ywp.misaka.network.P2POverlay;
+import ch.uzh.helper.FriendsListEntry;
+import ch.uzh.helper.PrivateUserProfile;
+import ch.uzh.helper.PublicUserProfile;
+import ch.uzh.helper.ChatMessage;
+import ch.uzh.helper.OnlineStatusMessage;
+import ch.uzh.helper.FriendRequestMessage;
+import ch.uzh.helper.ObjectReplyHandler;
+import ch.uzh.helper.P2POverlay;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.peers.PeerAddress;

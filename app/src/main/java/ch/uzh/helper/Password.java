@@ -1,4 +1,4 @@
-package moe.ywp.misaka.helper;
+package ch.uzh.helper;
 
 /**
  * Created by Stalin on 15/03/2017.

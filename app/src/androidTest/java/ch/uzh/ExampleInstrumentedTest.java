@@ -1,4 +1,4 @@
-package moe.ywp.misaka;
+package ch.uzh;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("moe.ywp.misaka", appContext.getPackageName());
+        assertEquals("moe.misaka", appContext.getPackageName());
     }
 }

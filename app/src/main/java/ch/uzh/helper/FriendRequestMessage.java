@@ -3,17 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package moe.ywp.misaka.helper;
+
+package ch.uzh.helper;
 
 import net.tomp2p.peers.PeerAddress;
 
 /**
  *
- * @author sstephan
+ * @author Sebastian
  */
-public class ChatMessage extends Message {
+public class FriendRequestMessage extends Message {
 
-    public ChatMessage(PeerAddress _senderPeerAddress, String _senderUserID, String _messageText) {
+
+    public FriendRequestMessage(PeerAddress _senderPeerAddress, String _senderUserID, String _messageText) {
         super(_senderPeerAddress, _senderUserID, _messageText);
     }
+
 }

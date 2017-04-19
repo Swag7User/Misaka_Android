@@ -1,4 +1,4 @@
-//gradlew installDebug --daemon && adb shell am start -n moe.ywp.misaka/.LoginActivity
+//gradlew installDebug --daemon && adb shell am start -n moe.misaka/.LoginActivity
 
 apply plugin: 'com.android.application'
 
@@ -7,7 +7,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         multiDexEnabled true
-        applicationId "moe.ywp.misaka"
+        applicationId "moe.misaka"
         minSdkVersion 24
         targetSdkVersion 25
         versionCode 1
