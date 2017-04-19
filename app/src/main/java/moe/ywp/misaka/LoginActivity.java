@@ -35,6 +35,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class LoginActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public MainWindow mainWindow;
+
     private String username;
     private String password;
     private int clientId;
@@ -57,14 +59,13 @@ public class LoginActivity extends AppCompatActivity
         passwordField = (EditText) findViewById(R.id.passwordEditText);
         errorLable = (TextView) findViewById(R.id.errorLable);
 
-
         FloatingActionButton fabLog = (FloatingActionButton) findViewById(R.id.fabLog);
         fabLog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action LOGIN", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                System.err.println("clicked the login button");
+                System.err.println("clicked the reg button");
                 System.err.println("CLICK CLICK CLICK");
                 if (loginCheck() == false) {
                     return;
@@ -120,6 +121,11 @@ public class LoginActivity extends AppCompatActivity
         System.out.println("Bootstrapped to: " + bootstrapIP
                 + "My IP: " + p2p.getPeerAddress().inetAddress().getHostAddress());
 
+        mainWindow = new MainWindow(p2p);
+        GlobalState state = ((GlobalState) getApplicationContext());
+        state.setMainWindow(mainWindow);
+
+
     }
 
     public void reg() {
@@ -130,13 +136,7 @@ public class LoginActivity extends AppCompatActivity
             System.err.println("username: " + username);
             System.err.println("hashed password: " + password);
 
-            Pair<Boolean, String> result = createAccount(username, password);
-
-            if (result.first == true) {
-                System.err.println("Account creation OK");
-            } else {
-                System.err.println("Account creation FUCKED UP, OH NOEZ");
-            }
+            mainWindow.register(username, password);
 
         } catch (Exception e) {
             System.err.println("Caught Exception: " + e.getMessage());
@@ -144,40 +144,7 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
-    public Pair<Boolean, String> createAccount(String userID, String password) {
-        // Check if the user is already in the friendslist
 
-        // Check if account exists
-        if (p2p.getBlocking(userID) != null) {
-            System.err.println("NULL??? WHAT THE SHIT WHY???");
-            return new Pair<>(false, "Could not create user account. UserID already taken."); //TODO: LOGIN NOW
-
-        }
-
-        // Create private UserProfile
-        userProfile = new PrivateUserProfile(userID, password);
-
-        // TODO: Encrypt it with password
-        if (savePrivateUserProfile() == false) {
-            System.err.println("Error. Could not save private UserProfile");
-
-            return new Pair<>(false, "Error. Could not save private UserProfile");
-        }
-
-        // Create public UserProfile
-        PublicUserProfile publicUserProfile;
-        publicUserProfile = new PublicUserProfile(userID, userProfile.getKeyPair().getPublic(),
-                null);
-
-        if (p2p.put(userID, publicUserProfile)) {
-            login2(userID, password);
-            System.err.println("User account for user \"" + userID + "\" successfully created");
-            return new Pair<>(true, "User account for user \"" + userID + "\" successfully created");
-        } else {
-            System.err.println("Network DHT error. Could not save public UserProfile");
-            return new Pair<>(false, "Network DHT error. Could not save public UserProfile");
-        }
-    }
 
     private boolean savePrivateUserProfile() {
         // TODO: encrypt before saving
@@ -216,13 +183,7 @@ public class LoginActivity extends AppCompatActivity
             this.clientIP = ip;
             this.clientId = id;
 
-            Pair<Boolean, String> result = login2(username, password);
-
-            if (result.first == false) {
-                System.err.println("NOT Loged in successfully, SOMETHING BROKE");
-            } else {
-                System.err.println("Logged in A-Okay");
-            }
+            mainWindow.loginR(username, password, id, ip);
 
 
         } catch (Exception e) {
@@ -240,72 +201,10 @@ public class LoginActivity extends AppCompatActivity
 //        }
     }
 
-    public Pair<Boolean, String> login2(String userID, String password) {
+    public void login2(String userID, String password) {
 
+        mainWindow.login2R(userID, password);
 
-/*        if (BCrypt.checkpw(insecurePassword, hashed))
-            System.out.println("It matches");
-        else
-            System.out.println("It does not match");
-
-*/
-
-        // Get userprofile if password and username are correct
-        Object getResult = p2p.getBlocking(userID + password);
-        if (getResult == null) {
-            System.err.println("Login data not valid, Wrong UserID/password?");
-            return new Pair<>(false, "Login data not valid, Wrong UserID/password?");
-        }
-
-        System.err.println(getResult.toString());
-        userProfile = (PrivateUserProfile) getResult;
-
-
-        // Get public user profile
-        Object objectPublicUserProfile = p2p.getBlocking(userID);
-        if (objectPublicUserProfile == null) {
-            System.err.println("Could not retrieve public userprofile");
-            return new Pair<>(false, "Could not retrieve public userprofile");
-        }
-        PublicUserProfile publicUserProfile = (PublicUserProfile) objectPublicUserProfile;
-
-        // **** FRIENDS LIST ****
-        // Reset all friends list entries to offline and unkown peer address
-        for (FriendsListEntry e : userProfile.getFriendsList()) {
-            e.setOnline(false);
-            e.setPeerAddress(null);
-            e.setWaitingForHeartbeat(false);
-        }
-       // friendsList = FXCollections.synchronizedObservableList(FXCollections.observableList(userProfile.getFriendsList()));
-
-       // friendRequestsList = FXCollections.observableList(userProfile.getFriendRequestsList());
-
-
-
-
-        // Set current IP address in public user profile
-        publicUserProfile.setPeerAddress(p2p.getPeerAddress());
-
-        // Save public user profile
-        if (p2p.put(userID, publicUserProfile) == false) {
-            System.err.println("Could not update public user profile");
-            return new Pair<>(false, "Could not update public user profile");
-        }
-
-        // Set reply handler
-        p2p.setObjectDataReply(new ObjectReplyHandler(this));
-
-        // Send out online status to all friends
-     //   pingAllFriends(true);
-
-        // Schedule new thread to check periodically if friends are still online
-    /*    scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(() -> {
-            pingAllOnlineFriends();
-        }, 10, 10, SECONDS);
-*/
-        System.err.println("Login successful");
-        return new Pair<>(true, "Login successful");
     }
 
 

@@ -22,6 +22,7 @@ import net.tomp2p.storage.Data;
 import android.util.Pair;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Random;

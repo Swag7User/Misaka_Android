@@ -8,6 +8,7 @@ package moe.ywp.misaka.network;
 
 import moe.ywp.misaka.LoginActivity;
 import moe.ywp.misaka.MainActivity;
+import moe.ywp.misaka.MainWindow;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 
@@ -18,9 +19,9 @@ import net.tomp2p.rpc.ObjectDataReply;
  */
 public class ObjectReplyHandler implements ObjectDataReply {
 
-    private LoginActivity mainWindow;
+    private MainWindow mainWindow;
 
-    public ObjectReplyHandler(LoginActivity _mainWindow) {
+    public ObjectReplyHandler(MainWindow _mainWindow) {
         mainWindow = _mainWindow;
     }
 
@@ -28,10 +29,11 @@ public class ObjectReplyHandler implements ObjectDataReply {
     public Object reply(PeerAddress pa, Object o) throws Exception {
         System.err.println("ObjectReplyhandler");
         if (o instanceof FriendRequestMessage) {
- /*           Runnable task = () -> {
-                mainWindow.handleIncomingFriendRequest((FriendRequestMessage) o);
+            final Runnable r = new Runnable() {
+                public void run() {
+                    mainWindow.handleIncomingFriendRequest((FriendRequestMessage) o);
+                }
             };
-            Platform.runLater(task);*/
             System.err.println("instanceof FriendRequestMessage");
         }/* else if (o instanceof OnlineStatusMessage) {
             Runnable task = () -> {

@@ -1,8 +1,10 @@
 package moe.ywp.misaka;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Pair;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +17,8 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public MainWindow mainWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +44,11 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        GlobalState state = ((GlobalState) getApplicationContext());
+        mainWindow = state.getMainWindow();
+
+
     }
 
     @Override
@@ -83,6 +92,15 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
+
+            Pair<Boolean, String> result = mainWindow.sendFriendRequest("misaka", "hi, pls accept");
+            System.err.println("I SENT THSI SHIT YO: " + "misaka " + "hi, pls accept");
+
+            if (result.first == true) {
+                System.err.println("friend request sent");
+            } else {
+                System.err.println("friend request ERROR");
+            }
 
         } else if (id == R.id.nav_slideshow) {
 
