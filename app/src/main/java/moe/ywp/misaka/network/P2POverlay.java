@@ -61,9 +61,12 @@ public class P2POverlay {
             try {
                 return futureGet.data().object();
             } catch (Exception ex) {
+                System.err.println("MY ARCH NEMESIS");
+                ex.printStackTrace();
                 return null;
             }
         } else {
+            System.err.println("MY ARCH NEMESIS TOO TBH");
             return null;
         }
     }
@@ -110,11 +113,14 @@ public class P2POverlay {
             FutureBootstrap futureBootstrap = peer.bootstrap().inetAddress(InetAddress.getByName(bootstrapIP)).ports(4001).start();
             futureBootstrap.awaitUninterruptibly();
             if (futureBootstrap.isSuccess()) {
+                System.out.println("Bootstrap successful");
                 return new Pair<>(true, "Bootstrap successful");
             } else {
+                System.out.println("Could not bootstrap to well known peer");
                 return new Pair<>(false, "Could not bootstrap to well known peer");
             }
         } catch (UnknownHostException ex) {
+            System.out.println("Unknown bootstrap host. (UnknownHostException)");
             return new Pair<>(false, "Unknown bootstrap host. (UnknownHostException)");
         }
 

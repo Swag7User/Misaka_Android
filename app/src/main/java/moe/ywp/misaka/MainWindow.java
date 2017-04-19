@@ -1,9 +1,9 @@
 package moe.ywp.misaka;
 
 import android.util.Pair;
-import moe.ywp.misaka.Userstuff.FriendsListEntry;
-import moe.ywp.misaka.Userstuff.PrivateUserProfile;
-import moe.ywp.misaka.Userstuff.PublicUserProfile;
+import moe.ywp.misaka.helper.FriendsListEntry;
+import moe.ywp.misaka.helper.PrivateUserProfile;
+import moe.ywp.misaka.helper.PublicUserProfile;
 import moe.ywp.misaka.helper.ChatMessage;
 import moe.ywp.misaka.helper.OnlineStatusMessage;
 import moe.ywp.misaka.network.FriendRequestMessage;
@@ -13,10 +13,10 @@ import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.peers.PeerAddress;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -33,7 +33,7 @@ public class MainWindow {
 
     private PrivateUserProfile userProfile;
 
-    private P2POverlay p2p;
+    public P2POverlay p2p;
     private List<FriendsListEntry> friendsList;
     private List<FriendRequestMessage> friendRequestsList;
     private ScheduledExecutorService scheduler;
@@ -210,7 +210,7 @@ public class MainWindow {
         return savePrivateUserProfile();
     }
 
-    private void pingUser(String userID, boolean onlineStatus, boolean replyPongExpected) {
+    private void pingUser(final String userID, final boolean onlineStatus, final boolean replyPongExpected) {
         p2p.getNonBLocking(userID, new BaseFutureAdapter<FutureGet>() {
             @Override
             public void operationComplete(FutureGet f) throws Exception {
@@ -389,7 +389,6 @@ public class MainWindow {
         // TODO: Encrypt it with password
         if (savePrivateUserProfile() == false) {
             System.err.println("Error. Could not save private UserProfile");
-
             return new Pair<>(false, "Error. Could not save private UserProfile");
         }
 
@@ -398,7 +397,8 @@ public class MainWindow {
         publicUserProfile = new PublicUserProfile(userID, userProfile.getKeyPair().getPublic(),
                 null);
 
-        if (p2p.put(userID, publicUserProfile)) {
+        if (true) {
+            p2p.put(userID, publicUserProfile);
             login2R(userID, password);
             System.err.println("User account for user \"" + userID + "\" successfully created");
             return new Pair<>(true, "User account for user \"" + userID + "\" successfully created");
@@ -501,11 +501,26 @@ public class MainWindow {
 
         // Schedule new thread to check periodically if friends are still online
         scheduler = Executors.newScheduledThreadPool(1);
+
+
+            final Runnable pinger = new Runnable() {
+                public void run() { System.out.println("pinged online to all friends");
+                    pingAllOnlineFriends();
+                }
+            };
+            final ScheduledFuture<?> beeperHandle =
+                    scheduler.scheduleAtFixedRate(pinger, 10, 10, SECONDS);
+
+
+
+
+/*
         scheduler.scheduleAtFixedRate(() -> {
             pingAllOnlineFriends();
         }, 10, 10, SECONDS);
+*/
 
-        System.err.println("Login successful");
+        System.err.println("Login successful???? yea m8");
         return new Pair<>(true, "Login successful");
     }
 

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package moe.ywp.misaka.Userstuff;
+package moe.ywp.misaka.helper;
 
 import moe.ywp.misaka.network.FriendRequestMessage;
 import net.tomp2p.peers.PeerAddress;

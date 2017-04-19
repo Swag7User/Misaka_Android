@@ -1,7 +1,5 @@
 package moe.ywp.misaka;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -18,19 +16,13 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import moe.ywp.misaka.Userstuff.FriendsListEntry;
-import moe.ywp.misaka.Userstuff.PrivateUserProfile;
-import moe.ywp.misaka.Userstuff.PublicUserProfile;
+import moe.ywp.misaka.helper.PrivateUserProfile;
 import moe.ywp.misaka.helper.Password;
-import moe.ywp.misaka.network.ObjectReplyHandler;
 import moe.ywp.misaka.network.P2POverlay;
 import android.util.Pair;
-import moe.ywp.misaka.helper.*;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
+import java.math.BigInteger;
 
 public class LoginActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -174,12 +166,21 @@ public class LoginActivity extends AppCompatActivity
         return true;
     }
 
+    public String toHex(String arg) {
+        return String.format("%x", new BigInteger(1, arg.getBytes(/*YOUR_CHARSET?*/)));
+    }
+
     public void login(final int id, final String ip) {
         try {
+
             username = usernameField.getText().toString();
             password = passwordField.getText().toString();
             System.err.println("username:" + username);
             System.err.println("unhashed password:" + password);
+            System.err.println("HEX HEX ~~~~~~~~~~~~~~~INPUT LOGIN~~~~~~~~~~~~~ HEX HEX");
+            System.err.println("HEX username:" + toHex(username));
+            System.err.println("HEX unhashed password:" + toHex(password));
+
             this.clientIP = ip;
             this.clientId = id;
 

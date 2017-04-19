@@ -26,7 +26,7 @@ public class ObjectReplyHandler implements ObjectDataReply {
     }
 
     @Override
-    public Object reply(PeerAddress pa, Object o) throws Exception {
+    public Object reply(PeerAddress pa, final Object o) throws Exception {
         System.err.println("ObjectReplyhandler");
         if (o instanceof FriendRequestMessage) {
             final Runnable r = new Runnable() {
