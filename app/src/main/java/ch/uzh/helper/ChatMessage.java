@@ -7,13 +7,12 @@ package ch.uzh.helper;
 
 import net.tomp2p.peers.PeerAddress;
 
-/**
- *
- * @author sstephan
- */
-public class ChatMessage extends Message {
 
-    public ChatMessage(PeerAddress _senderPeerAddress, String _senderUserID, String _messageText) {
+public class ChatMessage extends Message {
+    private String identifier;
+
+    public ChatMessage(String identifier, PeerAddress _senderPeerAddress, String _senderUserID, String _messageText) {
         super(_senderPeerAddress, _senderUserID, _messageText);
+        this.identifier = identifier;
     }
 }
