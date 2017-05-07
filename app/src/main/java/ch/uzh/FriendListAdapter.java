@@ -22,14 +22,27 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
+        public View view;
         public ImageView friendPicture;
         public TextView friendName;
-        public ViewHolder(View view) {
-            super(view);
-            friendName = (TextView) view.findViewById(R.id.username);
-            friendPicture = (ImageView) view.findViewById(R.id.userPicture);
+        Context context = itemView.getContext();
+
+        public ViewHolder(View v) {
+            super(v);
+            friendName = (TextView) v.findViewById(R.id.username);
+            friendPicture = (ImageView) v.findViewById(R.id.userPicture);
+            view = v;
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    // item clicked
+                    int pos = getAdapterPosition();
+                    System.err.println(pos);
+                    ((MainActivity) context).onClickCalled(friendlist.get(pos).getUserID());
+                }
+            });
+
         }
     }
 

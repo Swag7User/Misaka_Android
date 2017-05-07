@@ -14,8 +14,7 @@ import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.peers.PeerAddress;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -37,10 +36,12 @@ public class MainWindow {
 
     public P2POverlay p2p;
     private List<FriendsListEntry> friendsList;
+    public Queue<ChatMessage> messageQueue;
     private List<FriendRequestMessage> friendRequestsList;
     private ScheduledExecutorService scheduler;
 
     private String currentChatPartner;
+
 
     public String getCurrentChatpartner(){
         return currentChatPartner;
@@ -52,6 +53,7 @@ public class MainWindow {
 
     public MainWindow( P2POverlay p2p){
         this.p2p = p2p;
+        messageQueue = new LinkedList();
     }
 
 
@@ -83,8 +85,7 @@ public class MainWindow {
         System.err.println("IMMA GONNA PRINT MY JSON");
         System.err.println(json);
         System.err.println("PRINTED MY JSON");
-
-        // TODO: encrypt before saving
+        System.err.println("errors? " + userProfile.getUserID() + " - " + userProfile.getPassword());
 
         return p2p.put(userProfile.getUserID() + userProfile.getPassword(), json);
     }
@@ -113,7 +114,15 @@ public class MainWindow {
         friendRequestsList.add(requestMessage);
 
         // Save the change
-        savePrivateUserProfile();
+        System.err.println("Am I here? lul");
+        boolean isSaved = savePrivateUserProfile();
+        if (isSaved == true){
+            System.err.println("saved succesfully");
+        } else{
+            System.err.println("saved UNsuccesfully");
+
+        }
+        System.err.println("why am i not here tough");
 
         // Show visual message
         int i = 0;
@@ -376,6 +385,8 @@ public class MainWindow {
         p2p.sendNonBlocking(friendsListEntry.getPeerAddress(), ChatMessageJson, false);
     }
 
+
+
     public void handleIncomingChatMessage(ChatMessage msg) {
         FriendsListEntry e = getFriendsListEntry(msg.getSenderUserID());
 
@@ -384,6 +395,11 @@ public class MainWindow {
             System.err.println("Message received from: " + msg.getSenderUserID() + " Messagetext: " + msg.getMessageText());
             //openChat.showIncomingChatMessage(msg.getSenderUserID(), msg.getMessageText());
             // msgWindowController.addChatBubble(msg.getMessageText(), msg.getSenderUserID(), false); TODO: update to android msgs
+            System.err.println("offer msg to queueu");
+            messageQueue.offer(msg);
+            System.err.println("queueu: " + messageQueue.peek());
+
+
         }
         else{
             System.err.println("That's my purse, i don't know you!");

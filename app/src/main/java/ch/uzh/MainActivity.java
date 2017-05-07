@@ -1,5 +1,6 @@
 package ch.uzh;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -30,6 +31,13 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     //private RecyclerView.Adapter mAdapter;
     private FriendListAdapter friendListAdapter;
+
+    public void onClickCalled(String anyValue) {
+        System.err.println(anyValue);
+        mainWindow.setCurrentChatpartner(anyValue);
+        Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
+        startActivity(intent);
+    }
 
 
     @Override
@@ -107,7 +115,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        //demoFriendList();
+        demoFriendList();
 
 
 
@@ -195,6 +203,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
+            Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
+            startActivity(intent);
 
         }
 

@@ -57,6 +57,7 @@ public class ObjectReplyHandler implements ObjectDataReply {
                 public void run() {
                     System.err.println("~~~~~~~~~~~~~~~FriendRequest message handling~~~~~~~~~~~~~");
                     mainWindow.handleIncomingFriendRequest(gsonReply.fromJson(jsonReply, FriendRequestMessage.class));
+                    System.err.println("~~~~~~~~~~~~~~~FriendRequest message handled~~~~~~~~~~~~~");
                 }
             };            r.run();
         } else if (identifier.equals("shit happens")) {

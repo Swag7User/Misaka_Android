@@ -44,11 +44,16 @@ public class P2POverlay {
         Data data;
         try {
             data = new Data(value);
+            System.err.println("Data created");
         } catch (IOException ex) {
+            System.err.println("Data NOT created");
+            ex.printStackTrace();
             return false;
         }
+        System.err.println("putting blocking stuff here");
 
         FuturePut futurePut = peerDHT.put(Number160.createHash(key)).data(data).start().awaitUninterruptibly();
+        System.err.println("Data created");
 
         return futurePut.isSuccess();
     }
