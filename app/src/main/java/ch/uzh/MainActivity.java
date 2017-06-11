@@ -1,10 +1,15 @@
 package ch.uzh;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.*;
 import android.util.Pair;
 import android.view.View;
@@ -16,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 import ch.uzh.helper.FriendRequestMessage;
 import ch.uzh.helper.FriendsListEntry;
 import ch.uzh.helper.PublicUserProfile;
@@ -31,6 +37,8 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     //private RecyclerView.Adapter mAdapter;
     private FriendListAdapter friendListAdapter;
+
+    private final int REQUEST_PERMISSION_RECORD_AUDIO=1;
 
     public void onClickCalled(String anyValue) {
         System.err.println(anyValue);
@@ -115,10 +123,65 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        demoFriendList();
+        //demoFriendList();
+
+        showPhoneStatePermission();
 
 
 
+
+
+    }
+
+    private void showPhoneStatePermission() {
+        int permissionCheck = ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.RECORD_AUDIO);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.RECORD_AUDIO)) {
+                showExplanation("Permission Needed", "Rationale", android.Manifest.permission.RECORD_AUDIO, REQUEST_PERMISSION_RECORD_AUDIO);
+            } else {
+                requestPermission(android.Manifest.permission.RECORD_AUDIO, REQUEST_PERMISSION_RECORD_AUDIO);
+            }
+        } else {
+            Toast.makeText(MainActivity.this, "Permission (already) Granted!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            String permissions[],
+            int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION_RECORD_AUDIO:
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this, "Permission Granted!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+                }
+        }
+    }
+
+    private void showExplanation(String title,
+                                 String message,
+                                 final String permission,
+                                 final int permissionRequestCode) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        requestPermission(permission, permissionRequestCode);
+                    }
+                });
+        builder.create().show();
+    }
+
+    private void requestPermission(String permissionName, int permissionRequestCode) {
+        ActivityCompat.requestPermissions(this,
+                new String[]{permissionName}, permissionRequestCode);
     }
 
     private void demoFriendList(){
@@ -171,6 +234,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
+
+            mainWindow.savePrivateUserProfileNonBlocking();
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 

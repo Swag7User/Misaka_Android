@@ -9,5 +9,6 @@
     <color name="gray">@android:color/darker_gray</color>
     <color name="transparent">@android:color/transparent</color>
     <color name="orange">#ffebcc</color>
+    <color name="black">#000000</color>
     <color name="background_tab_pressed">#6633B5E5</color>
 </resources>

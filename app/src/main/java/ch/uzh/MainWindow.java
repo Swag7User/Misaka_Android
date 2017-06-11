@@ -1,23 +1,26 @@
 package ch.uzh;
 
 import android.util.Pair;
-import ch.uzh.helper.FriendsListEntry;
-import ch.uzh.helper.PrivateUserProfile;
-import ch.uzh.helper.PublicUserProfile;
-import ch.uzh.helper.ChatMessage;
-import ch.uzh.helper.OnlineStatusMessage;
-import ch.uzh.helper.FriendRequestMessage;
-import ch.uzh.helper.ObjectReplyHandler;
-import ch.uzh.helper.P2POverlay;
+import ch.uzh.helper.*;
 import com.google.gson.Gson;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.peers.PeerAddress;
 
+import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.logging.Level;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -31,27 +34,38 @@ public class MainWindow {
     private String password;
     private boolean bootstrapNode;
 
+    Key publicKey;
+    Key privateKey;
+
+    byte[] publicKeySerialized;
+    byte[] privateKeySerialized;
 
     private PrivateUserProfile userProfile;
+    private EncryptedPrivateUserProfile encrypteduserProfile;
+
+    public static boolean futurputSuccess = false;
+
 
     public P2POverlay p2p;
     private List<FriendsListEntry> friendsList;
     public Queue<ChatMessage> messageQueue;
     private List<FriendRequestMessage> friendRequestsList;
     private ScheduledExecutorService scheduler;
+    private CallHandler callHandler;
+
 
     private String currentChatPartner;
 
 
-    public String getCurrentChatpartner(){
+    public String getCurrentChatpartner() {
         return currentChatPartner;
     }
 
-    public void setCurrentChatpartner(String userID){
+    public void setCurrentChatpartner(String userID) {
         currentChatPartner = userID;
     }
 
-    public MainWindow( P2POverlay p2p){
+    public MainWindow(P2POverlay p2p) {
         this.p2p = p2p;
         messageQueue = new LinkedList();
     }
@@ -65,8 +79,8 @@ public class MainWindow {
         friendRequestsList.remove(message);
 
         // Save User Profile
-        savePrivateUserProfile();
-        System.err.println("userid: " + message.getSenderUserID() + "messagetxt: " +  message.getMessageText() + "peeraddress: " + message.getSenderPeerAddress());
+        savePrivateUserProfileNonBlocking();
+        System.err.println("userid: " + message.getSenderUserID() + "messagetxt: " + message.getMessageText() + "peeraddress: " + message.getSenderPeerAddress());
         FriendsListEntry newFriend = new FriendsListEntry(message.getSenderUserID());
         newFriend.setPeerAddress(message.getSenderPeerAddress());
         //friendListController.updateFriends(); TODO: update to android friendlist
@@ -81,13 +95,41 @@ public class MainWindow {
 
     private boolean savePrivateUserProfile() {
         Gson gson = new Gson();
-        String json = gson.toJson(userProfile);
+        String json = gson.toJson(encrypteduserProfile);
         System.err.println("IMMA GONNA PRINT MY JSON");
         System.err.println(json);
         System.err.println("PRINTED MY JSON");
         System.err.println("errors? " + userProfile.getUserID() + " - " + userProfile.getPassword());
 
-        return p2p.put(userProfile.getUserID() + userProfile.getPassword(), json);
+        boolean now = p2p.putNonBlocking(userProfile.getUserID() + userProfile.getPassword(), json);
+
+        while(!futurputSuccess){
+            donothing();
+        }
+        futurputSuccess = false;
+
+        return now;
+    }
+
+    public boolean savePrivateUserProfileNonBlocking() {
+        Gson gson = new Gson();
+        String json = gson.toJson(encrypteduserProfile);
+        System.err.println("IMMA GONNA PRINT MY JSON NON BLOCKING");
+        System.err.println(json);
+        System.err.println("PRINTED MY JSON");
+        System.err.println("errors? " + userProfile.getUserID() + " - " + userProfile.getPassword());
+
+        return p2p.putNonBlocking(userProfile.getUserID() + userProfile.getPassword(), json);
+    }
+
+    public String getUserID() {
+        return (userProfile != null) ? userProfile.getUserID() : "error";
+    }
+
+    public void handleIncomingAudioFrame(AudioFrame frame) {
+        if (true) {
+            callHandler.addAudioFrame(frame.getData());
+        }
     }
 
     public void declineFriendRequest(FriendRequestMessage message) {
@@ -95,7 +137,32 @@ public class MainWindow {
         friendRequestsList.remove(message);
 
         // Save User Profile
-        savePrivateUserProfile();
+        savePrivateUserProfileNonBlocking();
+    }
+
+    public void startTransmitting() {
+        // Create new call
+        callHandler = new CallHandler(this, p2p, getFriendsListEntry(getCurrentChatpartner()));
+        try {
+            callHandler.start();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            stopTransmitting();
+            System.out.println("LineUnavailableException");
+        }
+    }
+
+    public void stopTransmitting() {
+        if (callHandler == null) {
+            return;
+        }
+        callHandler.stop();
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        callHandler = null;
     }
 
     public void handleIncomingFriendRequest(FriendRequestMessage requestMessage) {
@@ -115,10 +182,10 @@ public class MainWindow {
 
         // Save the change
         System.err.println("Am I here? lul");
-        boolean isSaved = savePrivateUserProfile();
-        if (isSaved == true){
+        boolean isSaved = savePrivateUserProfileNonBlocking();
+        if (isSaved == true) {
             System.err.println("saved succesfully");
-        } else{
+        } else {
             System.err.println("saved UNsuccesfully");
 
         }
@@ -128,7 +195,7 @@ public class MainWindow {
         int i = 0;
         int i2 = 0;
         System.err.println("friendlistsize: " + friendsList.size());
-        for(FriendsListEntry e : friendsList){
+        for (FriendsListEntry e : friendsList) {
             System.err.println("i: " + i++);
             System.err.println(e.toString());
         }
@@ -136,7 +203,7 @@ public class MainWindow {
         //FriendListController.showIncomingFriendRequest(requestMessage);
         acceptFriendRequest(requestMessage);
         System.err.println("friendlistsize: " + friendsList.size());
-        for(FriendsListEntry e : friendsList){
+        for (FriendsListEntry e : friendsList) {
             System.err.println("i2: " + i2++);
             System.err.println("friendlistitem: " + e.getUserID());
         }
@@ -181,11 +248,17 @@ public class MainWindow {
         if (sendDirect == false) {
             // Friend is not online, append to public profile
             friendProfile.getPendingFriendRequests().add(jsonFriendRequest);
-            if (p2p.put(userID, friendProfile) == false) {
+            boolean now = p2p.putNonBlocking(userID, friendProfile);
+
+            while (!futurputSuccess) {
+                donothing();
+            }
+            futurputSuccess = false;
+
+            if (now == false) {
                 return new Pair<>(false, "Error sending friend request");
             }
         }
-
 
 
         // Addd as friend
@@ -196,12 +269,12 @@ public class MainWindow {
         return new Pair<>(true, "Friend request to " + userID + " was sent");
     }
 
-    public void donothing(){
+    public void donothing() {
         System.err.println("nothing");
     }
 
     public FriendsListEntry getFriendsListEntry(String userID) {
-        if(friendsList == null){
+        if (friendsList == null) {
             return null;
         }
         for (FriendsListEntry e : friendsList) {
@@ -213,9 +286,9 @@ public class MainWindow {
     }
 
     public List<FriendsListEntry> getFriendsList() {
-        if(friendsList == null){
+        if (friendsList == null) {
             return friendsList = new ArrayList<FriendsListEntry>();
-        }else{
+        } else {
             return friendsList;
         }
     }
@@ -233,7 +306,7 @@ public class MainWindow {
         //friendListController.updateFriends(); TODO: update to android friendlist
 
         // Save profile
-        return savePrivateUserProfile();
+        return savePrivateUserProfileNonBlocking();
     }
 
     private void pingUser(String userID, boolean onlineStatus, boolean replyPongExpected) {
@@ -296,10 +369,19 @@ public class MainWindow {
 
         String newPublicUserProfileJson = publicUserprofileGson.toJson(publicUserProfile);
 
-        if (p2p.put(userProfile.getUserID(), newPublicUserProfileJson) == false) {
+        boolean now = p2p.putNonBlocking(userProfile.getUserID(), newPublicUserProfileJson);
+
+        while(!futurputSuccess){
+            donothing();
+        }
+        futurputSuccess = false;
+
+        if (now == false) {
             System.out.println("Could not update peer address in public user profile");
             return;
         }
+
+        savePrivateUserProfileNonBlocking();
 
         p2p.setObjectDataReply(null);
 
@@ -311,7 +393,7 @@ public class MainWindow {
     }
 
     private void pingAllFriends(boolean onlineStatus) {
-        if (friendsList == null){
+        if (friendsList == null) {
             return;
         }
         for (FriendsListEntry entry : friendsList) {
@@ -386,7 +468,6 @@ public class MainWindow {
     }
 
 
-
     public void handleIncomingChatMessage(ChatMessage msg) {
         FriendsListEntry e = getFriendsListEntry(msg.getSenderUserID());
 
@@ -400,8 +481,7 @@ public class MainWindow {
             System.err.println("queueu: " + messageQueue.peek());
 
 
-        }
-        else{
+        } else {
             System.err.println("That's my purse, i don't know you!");
         }
     }
@@ -438,25 +518,54 @@ public class MainWindow {
 
         }
 
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+            kpg.initialize(2048);
+            KeyPair kp = kpg.genKeyPair();
+            publicKeySerialized = kp.getPublic().getEncoded();
+            privateKeySerialized = kp.getPrivate().getEncoded();
+            publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(publicKeySerialized));
+            privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privateKeySerialized));
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+
+        }
+
         // Create private UserProfile
-        userProfile = new PrivateUserProfile(userID, password);
+        userProfile = new PrivateUserProfile(userID, password, privateKeySerialized);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            Encryption.encrypt(password, (Serializable) userProfile, baos);
+            byte[] encryptedArray = baos.toByteArray();
+            encrypteduserProfile = new EncryptedPrivateUserProfile(encryptedArray);
+            baos.close();
+        } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
 
         // TODO: Encrypt it with password
-        if (savePrivateUserProfile() == false) {
-            System.err.println("Error. Could not save private UserProfile");
-            return new Pair<>(false, "Error. Could not save private UserProfile");
-        }
+        boolean saving = savePrivateUserProfileNonBlocking();
+
+        System.err.println("saving is: " + saving);
 
         // Create public UserProfile
         PublicUserProfile publicUserProfile;
-        publicUserProfile = new PublicUserProfile(userID,    null);
+        publicUserProfile = new PublicUserProfile(userID, null, publicKeySerialized);
         Gson gson = new Gson();
         String jsonPublic = gson.toJson(publicUserProfile);
+        boolean now = p2p.putNonBlocking(userID, jsonPublic);
 
-        if (p2p.put(userID, jsonPublic)) {
+        while (!futurputSuccess) {
+            donothing();
+        }
+        futurputSuccess = false;
+
+
+        if (now) {
             login2R(userID, password);
             return new Pair<>(true, "User account for user \"" + userID + "\" successfully created");
         } else {
+            System.err.println("Network DHT error. Could not save public UserProfile");
             return new Pair<>(false, "Network DHT error. Could not save public UserProfile");
         }
     }
@@ -514,7 +623,20 @@ public class MainWindow {
         System.err.println("Whatdo we have here?");
         System.err.println(getResult);
         Gson gson = new Gson();
-        userProfile = gson.fromJson((String) getResult, PrivateUserProfile.class);
+        encrypteduserProfile = gson.fromJson((String) getResult, EncryptedPrivateUserProfile.class);
+        System.err.println("Whatdo we have here FO REAL?");
+        System.err.println(encrypteduserProfile.getEncryptedProfile().toString());
+        ByteArrayInputStream bais = new ByteArrayInputStream(encrypteduserProfile.getEncryptedProfile());
+        try {
+            userProfile = (PrivateUserProfile) Encryption.decrypt(password, bais);
+        }catch(IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e){
+            e.printStackTrace();
+        }
+        System.err.println("userID: " + userProfile.getUserID());
+        System.err.println("pw: " + userProfile.getPassword());
+        if (!userProfile.getFriendsList().isEmpty()) {
+            System.err.println("friends: " + userProfile.getFriendsList().get(0));
+        }
         //userProfile = (PrivateUserProfile) getResult;
 
 
@@ -535,11 +657,9 @@ public class MainWindow {
             e.setPeerAddress(null);
             e.setWaitingForHeartbeat(false);
         }
-         friendsList = ((userProfile.getFriendsList()));
+        friendsList = ((userProfile.getFriendsList()));
 
-         friendRequestsList = (userProfile.getFriendRequestsList());
-
-
+        friendRequestsList = (userProfile.getFriendRequestsList());
 
 
         // Set current IP address in public user profile
@@ -547,7 +667,14 @@ public class MainWindow {
         String jsonPublic = gson.toJson(publicUserProfile);
 
         // Save public user profile
-        if (p2p.put(userID, jsonPublic) == false) {
+        boolean now = p2p.putNonBlocking(userID, jsonPublic);
+
+        while (!futurputSuccess) {
+            donothing();
+        }
+        futurputSuccess = false;
+
+        if (now == false) {
             System.err.println("Could not update public user profile");
             return new Pair<>(false, "Could not update public user profile");
         }
@@ -556,19 +683,20 @@ public class MainWindow {
         p2p.setObjectDataReply(new ObjectReplyHandler(this));
 
         // Send out online status to all friends
-           pingAllFriends(true);
+        pingAllFriends(true);
 
         // Schedule new thread to check periodically if friends are still online
         scheduler = Executors.newScheduledThreadPool(1);
 
 
-            final Runnable pinger = new Runnable() {
-                public void run() { System.out.println("pinged online to all friends");
-                    pingAllOnlineFriends();
-                }
-            };
-            final ScheduledFuture<?> beeperHandle =
-                    scheduler.scheduleAtFixedRate(pinger, 10, 10, SECONDS);
+        final Runnable pinger = new Runnable() {
+            public void run() {
+                System.out.println("pinged online to all friends");
+                pingAllOnlineFriends();
+            }
+        };
+        final ScheduledFuture<?> beeperHandle =
+                scheduler.scheduleAtFixedRate(pinger, 10, 10, SECONDS);
 
 
 
@@ -606,11 +734,9 @@ public class MainWindow {
 
     }
 
-    public MainWindow getMainWindow(){
+    public MainWindow getMainWindow() {
         return this;
     }
-
-
 
 
 }

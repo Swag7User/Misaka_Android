@@ -5,6 +5,7 @@
  */
 package ch.uzh.helper;
 
+import ch.uzh.MainWindow;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.dht.FuturePut;
 import net.tomp2p.dht.PeerBuilderDHT;
@@ -44,7 +45,7 @@ public class P2POverlay {
         Data data;
         try {
             data = new Data(value);
-            System.err.println("Data created");
+            System.err.println("Data created1");
         } catch (IOException ex) {
             System.err.println("Data NOT created");
             ex.printStackTrace();
@@ -53,9 +54,37 @@ public class P2POverlay {
         System.err.println("putting blocking stuff here");
 
         FuturePut futurePut = peerDHT.put(Number160.createHash(key)).data(data).start().awaitUninterruptibly();
-        System.err.println("Data created");
+        System.err.println("Data created2");
 
         return futurePut.isSuccess();
+    }
+
+    public boolean putNonBlocking(String key, Object value) {
+        Data data;
+        try {
+            data = new Data(value);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        FuturePut futurePut = peerDHT.put(Number160.createHash(key)).data(data).start();
+
+        futurePut.addListener(new BaseFutureAdapter<FuturePut>() {
+            @Override
+            public void operationComplete(FuturePut future) throws Exception {
+                if(future.isSuccess()) { // this flag indicates if the future was successful
+                    System.out.println("success");
+                    MainWindow.futurputSuccess = true;
+                } else {
+                    System.out.println("failure");
+                }
+            }
+        });
+
+
+
+        return true;
     }
 
     public Object getBlocking(String key) {

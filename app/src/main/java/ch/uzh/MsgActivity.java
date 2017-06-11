@@ -2,7 +2,10 @@ package ch.uzh;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.media.*;
+import android.media.audiofx.AcousticEchoCanceler;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +25,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.*;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -52,6 +56,12 @@ public class MsgActivity extends AppCompatActivity
     private int keyboardHeight;
     private boolean keyboardVisible;
     private WindowManager.LayoutParams windowLayoutParams;
+
+    boolean isRecording = false;
+    AudioManager am = null;
+    AudioRecord record = null;
+    AudioTrack track = null;
+
 
     private EditText.OnKeyListener keyListener = new View.OnKeyListener() {
         @Override
@@ -126,6 +136,7 @@ public class MsgActivity extends AppCompatActivity
         setContentView(R.layout.activity_msg);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setVolumeControlStream(AudioManager.MODE_IN_COMMUNICATION);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -213,7 +224,67 @@ public class MsgActivity extends AppCompatActivity
 
         //demoFriendList();
 
+        initRecordAndTrack();
 
+        am = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+        am.setSpeakerphoneOn(true);
+
+        (new Thread()
+        {
+            @Override
+            public void run()
+            {
+                recordAndPlay();
+            }
+        }).start();
+
+
+
+
+    }
+
+    private void initRecordAndTrack()
+    {
+        int min = AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        record = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, 16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                min);
+        if (AcousticEchoCanceler.isAvailable())
+        {
+            AcousticEchoCanceler echoCancler = AcousticEchoCanceler.create(record.getAudioSessionId());
+            echoCancler.setEnabled(true);
+        }
+        int maxJitter = AudioTrack.getMinBufferSize(16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        track = new AudioTrack(AudioManager.MODE_IN_COMMUNICATION, 16000, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, maxJitter,
+                AudioTrack.MODE_STREAM);
+    }
+
+    private void recordAndPlay()
+    {
+        short[] lin = new short[1024];
+        int num = 0;
+        am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        while (true)
+        {
+            if (isRecording)
+            {
+                num = record.read(lin, 0, 1024);
+                track.write(lin, 0, num);
+            }
+        }
+    }
+
+    private void startRecordAndPlay()
+    {
+        record.startRecording();
+        track.play();
+        isRecording = true;
+    }
+
+    private void stopRecordAndPlay()
+    {
+        record.stop();
+        track.pause();
+        isRecording = false;
     }
 
     private void sendMessage(final String messageText, final UserType userType) {
@@ -545,18 +616,10 @@ public class MsgActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-            String s = "misaka";
-            Pair<Boolean, String> result = mainWindow.sendFriendRequest(s, "hi, pls accept");
-            System.err.println("I SENT THSI SHIT YO: " + "misaka " + "hi, pls accept");
-
-            if (result.first == true) {
-                System.err.println("friend request sent");
-            } else {
-                System.err.println("friend request ERROR");
-            }
+            mainWindow.startTransmitting();
+        } else if (id == R.id.nav_gallery)
+        {
+            mainWindow.stopTransmitting();
 
 
         } else if (id == R.id.nav_slideshow) {
@@ -572,10 +635,23 @@ public class MsgActivity extends AppCompatActivity
 
 
         } else if (id == R.id.nav_manage) {
+            Intent intent = new Intent(getApplicationContext(), CamActivity.class);
+            startActivity(intent);
+
 
         } else if (id == R.id.nav_share) {
+            if (!isRecording)
+            {
+                startRecordAndPlay();
+            }
 
         } else if (id == R.id.nav_send) {
+
+            if (isRecording)
+            {
+                stopRecordAndPlay();
+                System.err.println("stopped recording");
+            }
 
         }
 

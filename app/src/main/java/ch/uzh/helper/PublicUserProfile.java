@@ -15,15 +15,17 @@ import java.util.ArrayList;
 public class PublicUserProfile implements Serializable {
     private String userID;
     private String eMail;
+    private byte[] publicKeySerialized;
     private PeerAddress peerAddress;
     private ArrayList<String> pendingFriendRequests;
     private static final long serialVersionUID = 42L;
 
 
-    public PublicUserProfile(String _userID, PeerAddress _peerAddress) {
+    public PublicUserProfile(String _userID, PeerAddress _peerAddress, byte[] _publicKeySerialized) {
         userID = _userID;
         peerAddress = _peerAddress;
         pendingFriendRequests = new ArrayList<>();
+        publicKeySerialized = _publicKeySerialized;
     }
 
     public PublicUserProfile() {

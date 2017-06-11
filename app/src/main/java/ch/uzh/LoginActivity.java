@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import ch.uzh.helper.Encryption;
 import ch.uzh.helper.PrivateUserProfile;
 import ch.uzh.helper.Password;
 import ch.uzh.helper.P2POverlay;
@@ -40,6 +41,7 @@ public class LoginActivity extends AppCompatActivity
     private EditText usernameField;
     private EditText passwordField;
     private TextView errorLable;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,13 +120,14 @@ public class LoginActivity extends AppCompatActivity
         state.setMainWindow(mainWindow);
 
 
+
     }
 
     public void reg() {
         try {
 
             username = usernameField.getText().toString();
-            password = passwordField.getText().toString();
+            password = Encryption.sha256(username + passwordField.getText().toString());
             System.err.println("username: " + username);
             System.err.println("hashed password: " + password);
 
@@ -136,13 +139,6 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
-
-
-    private boolean savePrivateUserProfile() {
-        // TODO: encrypt before saving
-
-        return p2p.put(userProfile.getUserID() + userProfile.getPassword(), userProfile);
-    }
 
 
     public boolean loginCheck() {
@@ -174,7 +170,7 @@ public class LoginActivity extends AppCompatActivity
         try {
 
             username = usernameField.getText().toString();
-            password = passwordField.getText().toString();
+            password = Encryption.sha256(username + passwordField.getText().toString());
             System.err.println("username:" + username);
             System.err.println("unhashed password:" + password);
             System.err.println("HEX HEX ~~~~~~~~~~~~~~~INPUT LOGIN~~~~~~~~~~~~~ HEX HEX");
