@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              xmlns:card_view="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <android.support.v7.widget.CardView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/card_view"
+            android:layout_gravity="center"
+            card_view:cardBackgroundColor="#B2D9ED"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            card_view:cardCornerRadius="0dp">
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center">
+            <ImageView
+                    android:paddingLeft="20dp"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    card_view:srcCompat="@drawable/quantum_ic_play_circle_filled_grey600_36"
+                    android:id="@+id/userPicture" />
+            <TextView
+                    android:id="@+id/username"
+                    android:paddingLeft="20dp"
+                    android:textColor="#000000"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="username" />
+            <Space
+                    android:layout_width="150dp"
+                    android:layout_weight="1"
+                    android:layout_height="120dp" />
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>
