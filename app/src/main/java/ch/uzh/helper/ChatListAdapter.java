@@ -9,15 +9,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import ch.uzh.R;
 import ch.uzh.helper.widgets.Emoji;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-/**
- * Created by madhur on 17/01/15.
- */
 public class ChatListAdapter extends BaseAdapter {
+
+    private static final Logger log = LoggerFactory.getLogger(ChatListAdapter.class);
+
 
     private ArrayList<ChatMessage> chatMessages;
     private Context context;
@@ -116,10 +118,10 @@ public class ChatListAdapter extends BaseAdapter {
     @Override
     public int getItemViewType(int position) {
         ChatMessage message = chatMessages.get(position);
-        System.err.println("~~~~~~~~~~returning msg ???~~~~~~~~~~~~");
+        log.info("~~~~~~~~~~returning msg ???~~~~~~~~~~~~");
         if (chatMessages.get(position) != null) {
-            System.err.println(chatMessages.get(position).getMessageText());
-            System.err.println(chatMessages.get(position).getUserType());
+            log.info(chatMessages.get(position).getMessageText());
+            log.info(chatMessages.get(position).getUserType().toString());
         }
         return message.getUserType().ordinal();
     }

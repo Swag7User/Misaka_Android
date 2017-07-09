@@ -20,15 +20,20 @@ import android.widget.Button;
 import android.widget.EdgeEffect;
 import android.widget.EditText;
 import ch.uzh.helper.FriendsListEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AddActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final Logger log = LoggerFactory.getLogger(AddActivity.class);
+
 
     public MainWindow mainWindow;
     private EditText searchField;
 
     public void onClickCalled(String anyValue) {
-        System.err.println(anyValue);
+        log.info(anyValue);
         mainWindow.setCurrentChatpartner(anyValue);
         Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
         startActivity(intent);
@@ -42,24 +47,6 @@ public class AddActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-/*        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action MAIN activity newwww", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-
-
-
-                String test = "misaka";
-
-                System.err.println("what even is it???: " + mainWindow.p2p.getBlocking(test));
-
-            }
-        });*/
-
         Button button = (Button) findViewById(R.id.searchbutton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,12 +55,12 @@ public class AddActivity extends AppCompatActivity
 
                 String s = searchField.getText().toString();
                 Pair<Boolean, String> result = mainWindow.sendFriendRequest(s, "hi, pls accept");
-                System.err.println("I SENT THSI SHIT YO: " + s + " hi, pls accept");
+                log.info("I SENT THSI SHIT YO: " + s + " hi, pls accept");
 
                 if (result.first == true) {
-                    System.err.println("friend request sent");
+                    log.info("friend request sent");
                 } else {
-                    System.err.println("friend request ERROR");
+                    log.info("friend request ERROR");
                 }
 
             }
@@ -142,24 +129,24 @@ public class AddActivity extends AppCompatActivity
 
             String s = "misaka";
             Pair<Boolean, String> result = mainWindow.sendFriendRequest(s, "hi, pls accept");
-            System.err.println("I SENT THSI SHIT YO: " + "misaka " + "hi, pls accept");
+            log.info("I SENT THSI SHIT YO: " + "misaka " + "hi, pls accept");
 
             if (result.first == true) {
-                System.err.println("friend request sent");
+                log.info("friend request sent");
             } else {
-                System.err.println("friend request ERROR");
+                log.info("friend request ERROR");
             }
 
 
         } else if (id == R.id.nav_slideshow) {
 
             Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            System.err.println("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
+            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
 
             if (result.first == true) {
-                System.err.println("friend request sent to myself");
+                log.info("friend request sent to myself");
             } else {
-                System.err.println("friend request ERROR");
+                log.info("friend request ERROR");
             }
 
 

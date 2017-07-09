@@ -14,9 +14,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.channels.FileChannel;
 
-/**
- * Created by madhur on 3/1/15.
- */
 public class AndroidUtilities {
 
     public static float density = 1;
@@ -115,7 +112,7 @@ public class AndroidUtilities {
                 return insets.bottom;
             }
         } catch (Exception e) {
-            // FileLog.e("tmessages", e);
+            e.printStackTrace();
         }
         return 0;
     }

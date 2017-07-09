@@ -21,12 +21,17 @@ import ch.uzh.helper.PrivateUserProfile;
 import ch.uzh.helper.Password;
 import ch.uzh.helper.P2POverlay;
 import android.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
 public class LoginActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginActivity.class);
+
 
     public MainWindow mainWindow;
 
@@ -59,8 +64,8 @@ public class LoginActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action LOGIN", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                System.err.println("clicked the reg button");
-                System.err.println("CLICK CLICK CLICK");
+                log.info("clicked the reg button");
+                log.info("CLICK CLICK CLICK");
                 if (loginCheck() == false) {
                     return;
                 } else {
@@ -77,9 +82,9 @@ public class LoginActivity extends AppCompatActivity
         loginbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.err.println("clicked the REAL login button");
+                log.info("clicked the REAL login button");
                 if (loginCheck() == false) {
-                    System.err.println("LOGINCHECK FALSE");
+                    log.info("LOGINCHECK FALSE");
                     return;
                 } else {
                     int id = getId();
@@ -107,12 +112,12 @@ public class LoginActivity extends AppCompatActivity
         // Try to bootstrap yay
         Pair<Boolean, String> result = p2p.bootstrap(bootstrapIP);
         if (result.first == false) {
-            System.err.println("Aw shit, didn't work\n");
+            log.info("Aw shit, didn't work\n");
         } else{
-            System.err.println("it's AWRIGHT\n");
+            log.info("it's AWRIGHT\n");
         }
 
-        System.out.println("Bootstrapped to: " + bootstrapIP
+        log.info("Bootstrapped to: " + bootstrapIP
                 + "My IP: " + p2p.getPeerAddress().inetAddress().getHostAddress());
 
         mainWindow = new MainWindow(p2p);
@@ -128,13 +133,13 @@ public class LoginActivity extends AppCompatActivity
 
             username = usernameField.getText().toString();
             password = Encryption.sha256(username + passwordField.getText().toString());
-            System.err.println("username: " + username);
-            System.err.println("hashed password: " + password);
+            log.info("username: " + username);
+            log.info("hashed password: " + password);
 
             mainWindow.register(username, password);
 
         } catch (Exception e) {
-            System.err.println("Caught Exception: " + e.getMessage());
+            log.info("Caught Exception: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -157,7 +162,7 @@ public class LoginActivity extends AppCompatActivity
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Aw shit, password check borkered");
+            log.info("Aw shit, password check borkered");
         }
         return true;
     }
@@ -171,11 +176,11 @@ public class LoginActivity extends AppCompatActivity
 
             username = usernameField.getText().toString();
             password = Encryption.sha256(username + passwordField.getText().toString());
-            System.err.println("username:" + username);
-            System.err.println("unhashed password:" + password);
-            System.err.println("HEX HEX ~~~~~~~~~~~~~~~INPUT LOGIN~~~~~~~~~~~~~ HEX HEX");
-            System.err.println("HEX username:" + toHex(username));
-            System.err.println("HEX unhashed password:" + toHex(password));
+            log.info("username:" + username);
+            log.info("unhashed password:" + password);
+            log.info("HEX HEX ~~~~~~~~~~~~~~~INPUT LOGIN~~~~~~~~~~~~~ HEX HEX");
+            log.info("HEX username:" + toHex(username));
+            log.info("HEX unhashed password:" + toHex(password));
 
             this.clientIP = ip;
             this.clientId = id;
@@ -184,27 +189,11 @@ public class LoginActivity extends AppCompatActivity
 
 
         } catch (Exception e) {
-            System.err.println("Caught Exception: " + e.getMessage());
+            log.info("Caught Exception: " + e.getMessage());
             e.printStackTrace();
         }
-//        try {
-//            MainWindow mainWindow = new MainWindow();
-//            mainWindow.draw(loginWindow.getStage());
-//
-//        } catch (Exception e) {
-//            System.err.println("Caught Exception: " + e.getMessage());
-//            e.printStackTrace();
-//
-//        }
-    }
-
-    public void login2(String userID, String password) {
-
-        mainWindow.login2R(userID, password);
 
     }
-
-
 
     @Override
     public void onBackPressed() {

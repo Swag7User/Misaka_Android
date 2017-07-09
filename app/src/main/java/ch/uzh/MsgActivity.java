@@ -33,6 +33,8 @@ import ch.uzh.helper.*;
 import ch.uzh.helper.widgets.Emoji;
 import ch.uzh.helper.widgets.EmojiView;
 import ch.uzh.helper.widgets.SizeNotifierRelativeLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,6 +45,9 @@ import java.util.concurrent.TimeUnit;
 
 public class MsgActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SizeNotifierRelativeLayout.SizeNotifierRelativeLayoutDelegate, NotificationCenter.NotificationCenterDelegate {
+
+    private static final Logger log = LoggerFactory.getLogger(MsgActivity.class);
+
 
     public MainWindow mainWindow;
     private ListView chatListView;
@@ -92,10 +97,10 @@ public class MsgActivity extends AppCompatActivity
         public void onClick(View v) {
 
             if (v == enterChatView1) {
-                System.err.println("~~~~~~~~~~Sending msg ^^~~~~~~~~~~~~");
-                System.err.println(chatEditText1.getText().toString());
+                log.info("~~~~~~~~~~Sending msg ^^~~~~~~~~~~~~");
+                log.info(chatEditText1.getText().toString());
                 sendMessage(chatEditText1.getText().toString(), UserType.OTHER);
-                System.err.println("~~~~~~~~~~Sent msg ^^~~~~~~~~~~~~");
+                log.info("~~~~~~~~~~Sent msg ^^~~~~~~~~~~~~");
 
             }
 
@@ -196,24 +201,24 @@ public class MsgActivity extends AppCompatActivity
 
         h.postDelayed( new Runnable() {
             public void run() {
-                System.err.println("updated messages");
+                log.info("updated messages");
                 while (true){
                     ChatMessage msg;
                     try{
                         msg = mainWindow.messageQueue.remove();
-                        System.err.println("1");
+                        log.info("1");
 
                     } catch(Exception e) {
-                        System.err.println("2");
+                        log.info("2");
 
                         break;
                     }
                     if (msg == null){
-                        System.err.println("3");
+                        log.info("3");
 
                         break;
                     }else{
-                        System.err.println("4");
+                        log.info("4");
 
                         receiveMsg(msg.getMessageText());
                     }
@@ -342,7 +347,7 @@ public class MsgActivity extends AppCompatActivity
 
 
     public void receiveMsg(final String messageText){
-        System.err.println("receiveMsg");
+        log.info("receiveMsg");
 
         if (messageText.trim().length() == 0)
             return;
@@ -358,7 +363,7 @@ public class MsgActivity extends AppCompatActivity
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
             scrollMyListViewToBottom();
-            System.err.println("notifyDataSetChanged");
+            log.info("notifyDataSetChanged");
 
         }
 
@@ -625,12 +630,12 @@ public class MsgActivity extends AppCompatActivity
         } else if (id == R.id.nav_slideshow) {
 
             Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            System.err.println("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
+            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
 
             if (result.first == true) {
-                System.err.println("friend request sent to myself");
+                log.info("friend request sent to myself");
             } else {
-                System.err.println("friend request ERROR");
+                log.info("friend request ERROR");
             }
 
 
@@ -650,7 +655,7 @@ public class MsgActivity extends AppCompatActivity
             if (isRecording)
             {
                 stopRecordAndPlay();
-                System.err.println("stopped recording");
+                log.info("stopped recording");
             }
 
         }

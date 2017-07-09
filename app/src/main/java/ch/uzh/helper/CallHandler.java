@@ -1,19 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.uzh.helper;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import ch.uzh.MainWindow;
-import com.google.gson.Gson;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.PointerByReference;
 import net.tomp2p.audiovideowrapper.Opus;
 import android.media.MediaRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -23,6 +20,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class CallHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(CallHandler.class);
+
 
     static int BITRATE = 12000;
     static int BIT_DEPTH = 16;
@@ -79,7 +79,7 @@ public class CallHandler {
             incomingAudioBuffer.put(audioFrame);
         } catch (InterruptedException ex) {
             ex.printStackTrace();
-            System.out.println("InterruptedException");
+            log.info("InterruptedException");
         }
     }
     
@@ -105,21 +105,20 @@ public class CallHandler {
                         byte dataFromMic[] = recordFromMicrophone();
                         if (dataFromMic != null) {
                             AudioFrame frame = new AudioFrame("AudioFrame", p2p.getPeerAddress(), mainApp.getUserID(), dataFromMic);
-                            Gson gsonAudioframe = new Gson();
-                            String jsonAudioframe = gsonAudioframe.toJson(frame);
-                            System.err.println("Sending audioframe: " + jsonAudioframe );
-                            System.err.println("to buddy: " + friend.getPeerAddress() );
+                            String jsonAudioframe = GsonHelper.createJsonString(frame);
+                            log.info("Sending audioframe: " + jsonAudioframe );
+                            log.info("to buddy: " + friend.getPeerAddress() );
                             p2p.sendNonBlocking(friend.getPeerAddress(), jsonAudioframe, true);
                         }
 
                     } catch (Exception e) {
-                        System.out.println("Exception in RecordThread");
+                        log.info("Exception in RecordThread");
                         e.printStackTrace();
                     }
 
                 }
                 recorder.stop();
-                System.out.println("End of recording");
+                log.info("End of recording");
             }
         }
 
@@ -134,7 +133,7 @@ public class CallHandler {
                         int size = incomingAudioBuffer.size();
                         if (size >= 10) {
                             incomingAudioBuffer.clear();
-                            System.out.println("Deleted from Speakerbuffer " + size);
+                            log.info("Deleted from Speakerbuffer " + size);
                             continue;
                         }
 
@@ -160,10 +159,10 @@ public class CallHandler {
                         playBack(decodedAudio);
 
                     } catch (InterruptedException e) {
-                        System.out.println("Exception in PlayThread");
+                        log.info("Exception in PlayThread");
                     }
                 }
-                System.out.println("End of playing");
+                log.info("End of playing");
             }
         }
 
@@ -198,7 +197,7 @@ public class CallHandler {
         // If speaker is clogged, flush
         if (false) {
             track.flush();
-            System.out.println("Flushed data from Speaker");
+            log.info("Flushed data from Speaker");
         }
         // Write to line
         track.write(audio, 0, audio.length);

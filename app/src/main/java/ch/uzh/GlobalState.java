@@ -5,7 +5,6 @@ package ch.uzh;
  */
 
 import android.app.Application;
-import android.content.Context;
 import android.os.Handler;
 import ch.uzh.helper.App;
 import ch.uzh.helper.NativeLoader;

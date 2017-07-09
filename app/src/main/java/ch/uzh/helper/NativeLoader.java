@@ -1,11 +1,8 @@
-
-
 package ch.uzh.helper;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -170,15 +167,6 @@ public class NativeLoader {
                 return;
             }
 
-            /*
-            folder = "x86";
-                destLocalFile = new File(context.getFilesDir().getAbsolutePath() + "/libtmessages86.so");
-                if (!loadFromZip(context, destLocalFile, folder)) {
-                    destLocalFile = new File(context.getFilesDir().getAbsolutePath() + "/libtmessagesarm.so");
-                    folder = "armeabi";
-                    loadFromZip(context, destLocalFile, folder);
-                }
-             */
         } catch (Throwable e) {
             e.printStackTrace();
         }

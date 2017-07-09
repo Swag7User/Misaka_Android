@@ -5,14 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.*;
 import android.util.Pair;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,18 +17,18 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.Toast;
-import ch.uzh.helper.FriendRequestMessage;
 import ch.uzh.helper.FriendsListEntry;
-import ch.uzh.helper.PublicUserProfile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final Logger log = LoggerFactory.getLogger(MainActivity.class);
+
 
     public MainWindow mainWindow;
     private RecyclerView recyclerView;
@@ -41,7 +38,7 @@ public class MainActivity extends AppCompatActivity
     private final int REQUEST_PERMISSION_RECORD_AUDIO=1;
 
     public void onClickCalled(String anyValue) {
-        System.err.println(anyValue);
+        log.info(anyValue);
         mainWindow.setCurrentChatpartner(anyValue);
         Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
         startActivity(intent);
@@ -55,39 +52,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-/*        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action MAIN activity newwww", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-
-
-
-                String test = "misaka";
-
-                System.err.println("what even is it???: " + mainWindow.p2p.getBlocking(test));
-
-            }
-        });
-
-        Button button2 = (Button) findViewById(R.id.button2);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                System.err.println("last rty: " + mainWindow.p2p.getBlocking("misaka"));
-
-                System.err.println( "exists usr misaka: " + mainWindow.existsUser("misaka"));
-                System.err.println( "exists usr mikoto: " + mainWindow.existsUser("mikoto"));
-                System.err.println( "exists usr test77: " + mainWindow.existsUser("test77"));
-                System.err.println( "exists usr test42: " + mainWindow.existsUser("test42"));
-                System.err.println( "exists usr test48: " + mainWindow.existsUser("test48"));
-
-            }
-        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -115,21 +79,15 @@ public class MainActivity extends AppCompatActivity
 
         h.postDelayed( new Runnable() {
             public void run() {
-                System.err.println("updated friendslist");
+                log.info("updated friendslist");
                 friendListAdapter.notifyDataSetChanged();
                 h.postDelayed(this, 2000);
             }
         }, delay);
 
-
-
         //demoFriendList();
 
         showPhoneStatePermission();
-
-
-
-
 
     }
 
@@ -246,12 +204,12 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_slideshow) {
 
             Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            System.err.println("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
+            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
 
             if (result.first == true) {
-                System.err.println("friend request sent to myself");
+                log.info("friend request sent to myself");
             } else {
-                System.err.println("friend request ERROR");
+                log.info("friend request ERROR");
             }
 
 

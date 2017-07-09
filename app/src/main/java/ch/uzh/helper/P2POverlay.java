@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.uzh.helper;
 
 import ch.uzh.MainWindow;
@@ -21,6 +16,8 @@ import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.rpc.ObjectDataReply;
 import net.tomp2p.storage.Data;
 import android.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -33,30 +30,15 @@ import java.util.Random;
  */
 public class P2POverlay {
 
+    private static final Logger log = LoggerFactory.getLogger(P2POverlay.class);
+
+
     private Peer peer;
     private PeerDHT peerDHT;
     private static Random rnd = new Random();
 
     public PeerAddress getPeerAddress() {
         return peer.peerAddress();
-    }
-
-    public boolean put(String key, Object value) {
-        Data data;
-        try {
-            data = new Data(value);
-            System.err.println("Data created1");
-        } catch (IOException ex) {
-            System.err.println("Data NOT created");
-            ex.printStackTrace();
-            return false;
-        }
-        System.err.println("putting blocking stuff here");
-
-        FuturePut futurePut = peerDHT.put(Number160.createHash(key)).data(data).start().awaitUninterruptibly();
-        System.err.println("Data created2");
-
-        return futurePut.isSuccess();
     }
 
     public boolean putNonBlocking(String key, Object value) {
@@ -74,10 +56,10 @@ public class P2POverlay {
             @Override
             public void operationComplete(FuturePut future) throws Exception {
                 if(future.isSuccess()) { // this flag indicates if the future was successful
-                    System.out.println("success");
+                    log.info("success");
                     MainWindow.futurputSuccess = true;
                 } else {
-                    System.out.println("failure");
+                    log.info("failure");
                 }
             }
         });
@@ -94,12 +76,12 @@ public class P2POverlay {
             try {
                 return futureGet.data().object();
             } catch (Exception ex) {
-                System.err.println("MY ARCH NEMESIS");
+                log.info("MY ARCH NEMESIS");
                 ex.printStackTrace();
                 return null;
             }
         } else {
-            System.err.println("MY ARCH NEMESIS TOO TBH");
+            log.info("MY ARCH NEMESIS TOO TBH");
             return null;
         }
     }
@@ -133,7 +115,7 @@ public class P2POverlay {
                 peerDHT = new PeerBuilderDHT(peer).start();
                 peerCreated = true;
             } catch (IOException ex) {
-                System.out.println("Port already in use. " + ex.getMessage());
+                log.info("Port already in use. " + ex.getMessage());
             }
         } while (!peerCreated && port < 4010);
 
@@ -146,14 +128,14 @@ public class P2POverlay {
             FutureBootstrap futureBootstrap = peer.bootstrap().inetAddress(InetAddress.getByName(bootstrapIP)).ports(4001).start();
             futureBootstrap.awaitUninterruptibly();
             if (futureBootstrap.isSuccess()) {
-                System.out.println("Bootstrap successful");
+                log.info("Bootstrap successful");
                 return new Pair<>(true, "Bootstrap successful");
             } else {
-                System.out.println("Could not bootstrap to well known peer");
+                log.info("Could not bootstrap to well known peer");
                 return new Pair<>(false, "Could not bootstrap to well known peer");
             }
         } catch (UnknownHostException ex) {
-            System.out.println("Unknown bootstrap host. (UnknownHostException)");
+            log.info("Unknown bootstrap host. (UnknownHostException)");
             return new Pair<>(false, "Unknown bootstrap host. (UnknownHostException)");
         }
 
