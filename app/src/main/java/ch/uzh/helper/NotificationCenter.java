@@ -1,5 +1,3 @@
-
-
 package ch.uzh.helper;
 
 import java.util.ArrayList;

@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package ch.uzh.helper;
 
 import net.tomp2p.peers.PeerAddress;
@@ -52,9 +46,6 @@ public class FriendsListEntry implements Serializable {
         return online;
     }
 
-    /**
-     * @param set online status (true=online, false=offline)
-     */
     public void setOnline(boolean online) {
         this.online = online;
     }
@@ -66,9 +57,6 @@ public class FriendsListEntry implements Serializable {
         return waitingForHeartbeat;
     }
 
-    /**
-     * @param flag the entry to be wating for a heartbeat.
-     */
     public void setWaitingForHeartbeat(boolean waitingForHeartbeat) {
         this.waitingForHeartbeat = waitingForHeartbeat;
     }

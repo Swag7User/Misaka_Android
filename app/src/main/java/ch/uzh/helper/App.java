@@ -3,9 +3,6 @@ package ch.uzh.helper;
 import android.app.Application;
 import android.os.Handler;
 
-/**
- * Created by madhur on 3/1/15.
- */
 public class App extends Application {
 
     private static App Instance;

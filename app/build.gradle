@@ -60,6 +60,7 @@ repositories {
         androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
             exclude group: 'com.android.support', module: 'support-annotations'
         })
+        compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
         compile 'com.android.support:appcompat-v7:25.3.1'
         compile 'com.android.support:design:25.3.1'
         compile 'net.tomp2p:tomp2p-all:5.0-Beta8'
