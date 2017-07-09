@@ -12,16 +12,6 @@ import java.io.*;
 public class Password {
 
     /**
-     *
-     * @param password plaintext string from the password field
-     * @return bcrypt salted hash of password
-     */
-    public static String hashPassword(String password) {
-        String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
-        return hashed;
-    }
-
-    /**
      * checks password length
      * @param password plaintext string from the password field
      * @return bool, true if long enough false if too short

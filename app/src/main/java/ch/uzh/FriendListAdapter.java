@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import ch.uzh.helper.FriendsListEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -15,6 +17,9 @@ import java.util.List;
  * Created by Jesus on 30.04.2017.
  */
 public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.ViewHolder> {
+
+    private static final Logger log = LoggerFactory.getLogger(FriendListAdapter.class);
+
 
     private Context mContext;
     private List<FriendsListEntry> friendlist;
@@ -38,7 +43,7 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Vi
                 @Override public void onClick(View v) {
                     // item clicked
                     int pos = getAdapterPosition();
-                    System.err.println(pos);
+                    log.info(String.valueOf(pos));
                     ((MainActivity) context).onClickCalled(friendlist.get(pos).getUserID());
                 }
             });

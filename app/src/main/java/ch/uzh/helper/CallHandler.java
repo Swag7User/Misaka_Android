@@ -4,7 +4,6 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import ch.uzh.MainWindow;
-import com.google.gson.Gson;
 import com.sun.jna.Native;
 import com.sun.jna.ptr.PointerByReference;
 import net.tomp2p.audiovideowrapper.Opus;

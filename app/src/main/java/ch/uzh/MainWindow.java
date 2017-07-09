@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import net.tomp2p.dht.FutureGet;
 import net.tomp2p.futures.BaseFutureAdapter;
 import net.tomp2p.peers.PeerAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.NoSuchPaddingException;
 import java.io.ByteArrayInputStream;
@@ -20,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.logging.Level;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -28,6 +29,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * Created by Jesus on 19.04.2017.
  */
 public class MainWindow {
+
+    private static final Logger log = LoggerFactory.getLogger(MainWindow.class);
+
     private int id;
     private String ip;
     private String username;
@@ -80,44 +84,19 @@ public class MainWindow {
 
         // Save User Profile
         savePrivateUserProfileNonBlocking();
-        System.err.println("userid: " + message.getSenderUserID() + "messagetxt: " + message.getMessageText() + "peeraddress: " + message.getSenderPeerAddress());
+        log.info("userid: " + message.getSenderUserID() + "messagetxt: " + message.getMessageText() + "peeraddress: " + message.getSenderPeerAddress());
         FriendsListEntry newFriend = new FriendsListEntry(message.getSenderUserID());
         newFriend.setPeerAddress(message.getSenderPeerAddress());
         //friendListController.updateFriends(); TODO: update to android friendlist
-       /* Pair<Boolean, String> result = sendFriendRequest(message.getSenderUserID(), "hi, pls accept 2");
 
-        if (result.getKey() == true) {
-            System.err.println("response friend request sent");
-        } else {
-            System.err.println("response friend request ERROR");
-        }*/
-    }
-
-    private boolean savePrivateUserProfile() {
-        Gson gson = new Gson();
-        String json = gson.toJson(encrypteduserProfile);
-        System.err.println("IMMA GONNA PRINT MY JSON");
-        System.err.println(json);
-        System.err.println("PRINTED MY JSON");
-        System.err.println("errors? " + userProfile.getUserID() + " - " + userProfile.getPassword());
-
-        boolean now = p2p.putNonBlocking(userProfile.getUserID() + userProfile.getPassword(), json);
-
-        while(!futurputSuccess){
-            donothing();
-        }
-        futurputSuccess = false;
-
-        return now;
     }
 
     public boolean savePrivateUserProfileNonBlocking() {
-        Gson gson = new Gson();
-        String json = gson.toJson(encrypteduserProfile);
-        System.err.println("IMMA GONNA PRINT MY JSON NON BLOCKING");
-        System.err.println(json);
-        System.err.println("PRINTED MY JSON");
-        System.err.println("errors? " + userProfile.getUserID() + " - " + userProfile.getPassword());
+        String json = GsonHelper.createJsonString(encrypteduserProfile);
+        log.info("IMMA GONNA PRINT MY JSON NON BLOCKING");
+        log.info(json);
+        log.info("PRINTED MY JSON");
+        log.info("errors? " + userProfile.getUserID() + " - " + userProfile.getPassword());
 
         return p2p.putNonBlocking(userProfile.getUserID() + userProfile.getPassword(), json);
     }
@@ -168,45 +147,25 @@ public class MainWindow {
     public void handleIncomingFriendRequest(FriendRequestMessage requestMessage) {
         // Ignore requests from users already in the list
         if (userProfile.isFriendsWith(requestMessage.getSenderUserID())) {
-            System.err.println("user already in friendlist");
+            log.info("user already in friendlist");
             return;
         }
-
-        // Ignore multiple requests
-/*        if (userProfile.hasFriendRequestFromUser(requestMessage.getSenderUserID())) {
-            return;
-        }*/
 
         // Add friend request
         friendRequestsList.add(requestMessage);
 
         // Save the change
-        System.err.println("Am I here? lul");
+        log.info("Am I here? lul");
         boolean isSaved = savePrivateUserProfileNonBlocking();
         if (isSaved == true) {
-            System.err.println("saved succesfully");
+            log.info("saved succesfully");
         } else {
-            System.err.println("saved UNsuccesfully");
+            log.info("saved UNsuccesfully");
 
         }
-        System.err.println("why am i not here tough");
+        log.info("why am i not here tough");
 
-        // Show visual message
-        int i = 0;
-        int i2 = 0;
-        System.err.println("friendlistsize: " + friendsList.size());
-        for (FriendsListEntry e : friendsList) {
-            System.err.println("i: " + i++);
-            System.err.println(e.toString());
-        }
-        System.err.println(" BEFORE, AFTER");
-        //FriendListController.showIncomingFriendRequest(requestMessage);
         acceptFriendRequest(requestMessage);
-        System.err.println("friendlistsize: " + friendsList.size());
-        for (FriendsListEntry e : friendsList) {
-            System.err.println("i2: " + i2++);
-            System.err.println("friendlistitem: " + e.getUserID());
-        }
 
     }
 
@@ -218,13 +177,13 @@ public class MainWindow {
     public Pair<Boolean, String> sendFriendRequest(String userID, String messageText) {
         // Check if user already exists in friends list
         if (getFriendsListEntry(userID) != null) {
-            System.err.println("User already in friendslist");
+            log.info("User already in friendslist");
             return new Pair<>(false, "User already in friendslist");
         }
 
         // Check if user exists in the network
         if (!existsUser(userID)) {
-            System.err.println("User was not found");
+            log.info("User was not found");
             return new Pair<>(false, "User was not found");
         }
 
@@ -235,8 +194,7 @@ public class MainWindow {
         // Create friend request message
         FriendRequestMessage friendRequestMessage = new FriendRequestMessage("FriendRequestMessage", p2p.getPeerAddress(), userProfile.getUserID(), messageText);
 
-        Gson gsonFriendRequest = new Gson();
-        String jsonFriendRequest = gsonFriendRequest.toJson(friendRequestMessage);
+        String jsonFriendRequest = GsonHelper.createJsonString(friendRequestMessage);
 
         // Try to send direct friend request first, (in case user is online)
         boolean sendDirect = false;
@@ -270,7 +228,7 @@ public class MainWindow {
     }
 
     public void donothing() {
-        System.err.println("nothing");
+        log.info("nothing");
     }
 
     public FriendsListEntry getFriendsListEntry(String userID) {
@@ -295,10 +253,8 @@ public class MainWindow {
 
     public boolean addFriend(String userID) {
         // Add to list
-        System.err.println("ADD THIS BFF: " + userID);
+        log.info("ADD THIS BFF: " + userID);
         friendsList.add(new FriendsListEntry(userID));
-        //friendsList.sort(new FriendsListComparator());
-        //mainController.sortFriendsListView();
 
         // Send ping
         pingUser(userID, true, true);
@@ -341,10 +297,9 @@ public class MainWindow {
     public void pingAddress(PeerAddress pa, boolean onlineStatus, boolean replyPongExpected) {
         // Send ping
         OnlineStatusMessage msg = new OnlineStatusMessage("OnlineStatusMessage", p2p.getPeerAddress(), userProfile.getUserID(), onlineStatus, replyPongExpected);
-        Gson onlineStatusMessageGson = new Gson();
-        String onlineStatusMessageJson = onlineStatusMessageGson.toJson(msg);
+        String onlineStatusMessageJson = GsonHelper.createJsonString(msg);
 
-        p2p.sendNonBlocking(pa, onlineStatusMessageJson, false);
+                p2p.sendNonBlocking(pa, onlineStatusMessageJson, false);
     }
 
     public void logout() {
@@ -367,7 +322,7 @@ public class MainWindow {
         PublicUserProfile publicUserProfile = publicUserprofileGson.fromJson(publicUserProfileJson, PublicUserProfile.class);
         publicUserProfile.setPeerAddress(null);
 
-        String newPublicUserProfileJson = publicUserprofileGson.toJson(publicUserProfile);
+        String newPublicUserProfileJson = GsonHelper.createJsonString(publicUserProfile);
 
         boolean now = p2p.putNonBlocking(userProfile.getUserID(), newPublicUserProfileJson);
 
@@ -403,8 +358,7 @@ public class MainWindow {
             if (entry.isOnline()) {
                 OnlineStatusMessage ping = new OnlineStatusMessage("OnlineStatusMessage", p2p.getPeerAddress(), userProfile.getUserID(),
                         onlineStatus, onlineStatus);
-                Gson pingAllFriendsGson = new Gson();
-                String pingAllFriendsJson = pingAllFriendsGson.toJson(ping);
+                String pingAllFriendsJson = GsonHelper.createJsonString(ping);
 
                 p2p.sendNonBlocking(entry.getPeerAddress(), pingAllFriendsJson, false);
             } // For friends that are offline and in the case that we want to tell
@@ -434,12 +388,6 @@ public class MainWindow {
             // If friend is in friendslist
             if (e != null) {
 
-                // Show notification if user came online
-/*                if (msg.isOnline() && !e.isOnline()) {
-                    Notifications.create().text("User " + msg.getSenderUserID() + " just came online")
-                            .showInformation();
-                }*/
-
                 // Set online/offline
                 e.setOnline(msg.isOnline());
                 e.setPeerAddress(msg.getSenderPeerAddress());
@@ -457,11 +405,10 @@ public class MainWindow {
 
     public void sendChatMessage(String text, FriendsListEntry friendsListEntry) {
         ChatMessage chatMessage = new ChatMessage("ChatMessage", p2p.getPeerAddress(), userProfile.getUserID(), text);
-        System.err.println("SENDING THIS: peeraddress: " + p2p.getPeerAddress() + " userID: " + userProfile.getUserID() + " text: " + text);
-        System.err.println("SENDING TO: peeraddress: " + friendsListEntry.getPeerAddress() + " userID: " + friendsListEntry.getUserID() + " text: " + text);
+        log.info("SENDING THIS: peeraddress: " + p2p.getPeerAddress() + " userID: " + userProfile.getUserID() + " text: " + text);
+        log.info("SENDING TO: peeraddress: " + friendsListEntry.getPeerAddress() + " userID: " + friendsListEntry.getUserID() + " text: " + text);
 
-        Gson chatMessageGson = new Gson();
-        String ChatMessageJson = chatMessageGson.toJson(chatMessage);
+        String ChatMessageJson = GsonHelper.createJsonString(chatMessage);
 
 
         p2p.sendNonBlocking(friendsListEntry.getPeerAddress(), ChatMessageJson, false);
@@ -473,16 +420,14 @@ public class MainWindow {
 
         // If friend is in friendslist
         if (e != null) {
-            System.err.println("Message received from: " + msg.getSenderUserID() + " Messagetext: " + msg.getMessageText());
-            //openChat.showIncomingChatMessage(msg.getSenderUserID(), msg.getMessageText());
-            // msgWindowController.addChatBubble(msg.getMessageText(), msg.getSenderUserID(), false); TODO: update to android msgs
-            System.err.println("offer msg to queueu");
+            log.info("Message received from: " + msg.getSenderUserID() + " Messagetext: " + msg.getMessageText());
+            log.info("offer msg to queueu");
             messageQueue.offer(msg);
-            System.err.println("queueu: " + messageQueue.peek());
+            log.info("queueu: " + messageQueue.peek());
 
 
         } else {
-            System.err.println("That's my purse, i don't know you!");
+            log.info("That's my purse, i don't know you!");
         }
     }
 
@@ -491,19 +436,19 @@ public class MainWindow {
 
             this.username = username;
             this.password = password;
-            System.err.println("username: " + username);
-            System.err.println("hashed password: " + password);
+            log.info("username: " + username);
+            log.info("hashed password: " + password);
 
             Pair<Boolean, String> result = createAccount(username, password);
 
             if (result.first == true) {
-                System.err.println("Account creation OK");
+                log.info("Account creation OK");
             } else {
-                System.err.println("Account creation FUCKED UP, OH NOEZ");
+                log.info("Account creation FUCKED UP, OH NOEZ");
             }
 
         } catch (Exception e) {
-            System.err.println("Caught Exception: " + e.getMessage());
+            log.info("Caught Exception: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -513,7 +458,7 @@ public class MainWindow {
 
         // Check if account exists
         if (p2p.getBlocking(userID) != null) {
-            System.err.println("NULL??? WHAT THE SHIT WHY???");
+            log.info("NULL??? WHAT THE SHIT WHY???");
             return new Pair<>(false, "Could not create user account. UserID already taken."); //TODO: LOGIN NOW
 
         }
@@ -546,13 +491,12 @@ public class MainWindow {
         // TODO: Encrypt it with password
         boolean saving = savePrivateUserProfileNonBlocking();
 
-        System.err.println("saving is: " + saving);
+        log.info("saving is: " + saving);
 
         // Create public UserProfile
         PublicUserProfile publicUserProfile;
         publicUserProfile = new PublicUserProfile(userID, null, publicKeySerialized);
-        Gson gson = new Gson();
-        String jsonPublic = gson.toJson(publicUserProfile);
+        String jsonPublic = GsonHelper.createJsonString(publicUserProfile);
         boolean now = p2p.putNonBlocking(userID, jsonPublic);
 
         while (!futurputSuccess) {
@@ -565,7 +509,7 @@ public class MainWindow {
             login2R(userID, password);
             return new Pair<>(true, "User account for user \"" + userID + "\" successfully created");
         } else {
-            System.err.println("Network DHT error. Could not save public UserProfile");
+            log.info("Network DHT error. Could not save public UserProfile");
             return new Pair<>(false, "Network DHT error. Could not save public UserProfile");
         }
     }
@@ -574,68 +518,52 @@ public class MainWindow {
         try {
             this.username = username;
             this.password = password;
-            System.err.println("username:" + username);
-            System.err.println("unhashed password:" + password);
+            log.info("username:" + username);
+            log.info("unhashed password:" + password);
             //this.clientIP = ip;
             //this.clientId = id;
 
             Pair<Boolean, String> result = login2R(username, password);
 
             if (result.first == false) {
-                System.err.println("NOT Loged in successfully, SOMETHING BROKE");
+                log.info("NOT Loged in successfully, SOMETHING BROKE");
             } else {
-                System.err.println("Logged in A-Okay");
+                log.info("Logged in A-Okay");
             }
 
 
         } catch (Exception e) {
-            System.err.println("Caught Exception: " + e.getMessage());
+            log.info("Caught Exception: " + e.getMessage());
             e.printStackTrace();
         }
-//        try {
-//            MainWindow mainWindow = new MainWindow();
-//            mainWindow.draw(loginWindow.getStage());
-//
-//        } catch (Exception e) {
-//            System.err.println("Caught Exception: " + e.getMessage());
-//            e.printStackTrace();
-//
-//        }
+
     }
 
     public Pair<Boolean, String> login2R(String userID, String password) {
 
-
-/*        if (BCrypt.checkpw(insecurePassword, hashed))
-            System.out.println("It matches");
-        else
-            System.out.println("It does not match");
-
-*/
-
         // Get userprofile if password and username are correct
         Object getResult = p2p.getBlocking(userID + password);
         if (getResult == null) {
-            System.err.println("Login data not valid, Wrong UserID/password?");
+            log.info("Login data not valid, Wrong UserID/password?");
             return new Pair<>(false, "Login data not valid, Wrong UserID/password?");
         }
 
-        System.err.println("Whatdo we have here?");
-        System.err.println(getResult);
+        log.info("Whatdo we have here?");
+        log.info(getResult.toString());
         Gson gson = new Gson();
         encrypteduserProfile = gson.fromJson((String) getResult, EncryptedPrivateUserProfile.class);
-        System.err.println("Whatdo we have here FO REAL?");
-        System.err.println(encrypteduserProfile.getEncryptedProfile().toString());
+        log.info("Whatdo we have here FO REAL?");
+        log.info(encrypteduserProfile.getEncryptedProfile().toString());
         ByteArrayInputStream bais = new ByteArrayInputStream(encrypteduserProfile.getEncryptedProfile());
         try {
             userProfile = (PrivateUserProfile) Encryption.decrypt(password, bais);
         }catch(IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e){
             e.printStackTrace();
         }
-        System.err.println("userID: " + userProfile.getUserID());
-        System.err.println("pw: " + userProfile.getPassword());
+        log.info("userID: " + userProfile.getUserID());
+        log.info("pw: " + userProfile.getPassword());
         if (!userProfile.getFriendsList().isEmpty()) {
-            System.err.println("friends: " + userProfile.getFriendsList().get(0));
+            log.info("friends: " + userProfile.getFriendsList().get(0));
         }
         //userProfile = (PrivateUserProfile) getResult;
 
@@ -643,12 +571,11 @@ public class MainWindow {
         // Get public user profile
         Object objectPublicUserProfile = p2p.getBlocking(userID);
         if (objectPublicUserProfile == null) {
-            System.err.println("Could not retrieve public userprofile");
+            log.info("Could not retrieve public userprofile");
             return new Pair<>(false, "Could not retrieve public userprofile");
         }
 
         PublicUserProfile publicUserProfile = gson.fromJson((String) objectPublicUserProfile, PublicUserProfile.class);
-        //PublicUserProfile publicUserProfile = (PublicUserProfile) objectPublicUserProfile;
 
         // **** FRIENDS LIST ****
         // Reset all friends list entries to offline and unkown peer address
@@ -664,7 +591,7 @@ public class MainWindow {
 
         // Set current IP address in public user profile
         publicUserProfile.setPeerAddress(p2p.getPeerAddress());
-        String jsonPublic = gson.toJson(publicUserProfile);
+        String jsonPublic = GsonHelper.createJsonString(publicUserProfile);
 
         // Save public user profile
         boolean now = p2p.putNonBlocking(userID, jsonPublic);
@@ -675,7 +602,7 @@ public class MainWindow {
         futurputSuccess = false;
 
         if (now == false) {
-            System.err.println("Could not update public user profile");
+            log.info("Could not update public user profile");
             return new Pair<>(false, "Could not update public user profile");
         }
 
@@ -698,16 +625,7 @@ public class MainWindow {
         final ScheduledFuture<?> beeperHandle =
                 scheduler.scheduleAtFixedRate(pinger, 10, 10, SECONDS);
 
-
-
-
-/*
-        scheduler.scheduleAtFixedRate(() -> {
-            pingAllOnlineFriends();
-        }, 10, 10, SECONDS);
-*/
-
-        System.err.println("Login successful???? yea m8");
+        log.info("Login successful???? yea m8");
         return new Pair<>(true, "Login successful");
     }
 
@@ -717,7 +635,6 @@ public class MainWindow {
                 // If friend din't reply since last call, set him offline
                 if (entry.isWaitingForHeartbeat()) {
                     entry.setOnline(false);
-                    // sortFriendsListView();
                 }
 
                 // Flag friend until he replies
@@ -726,7 +643,7 @@ public class MainWindow {
                 OnlineStatusMessage ping = new OnlineStatusMessage("OnlineStatusMessage", p2p.getPeerAddress(), userProfile.getUserID(),
                         true, true);
                 Gson pingAllOnlineFriendsGson = new Gson();
-                String pingAllOnlineFriendsJson = pingAllOnlineFriendsGson.toJson(ping);
+                String pingAllOnlineFriendsJson = GsonHelper.createJsonString(ping);
 
                 p2p.sendNonBlocking(entry.getPeerAddress(), pingAllOnlineFriendsJson, false);
             }

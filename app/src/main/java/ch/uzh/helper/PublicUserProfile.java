@@ -22,11 +22,6 @@ public class PublicUserProfile implements Serializable {
         publicKeySerialized = _publicKeySerialized;
     }
 
-    public PublicUserProfile() {
-
-    }
-
-
     public String geteMail() {
         return eMail;
     }
