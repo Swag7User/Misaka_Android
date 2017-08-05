@@ -1,5 +1,6 @@
 package ch.uzh;
 
+import android.content.Context;
 import android.util.Pair;
 import ch.uzh.helper.*;
 import com.google.gson.Gson;
@@ -44,18 +45,23 @@ public class MainWindow {
     byte[] publicKeySerialized;
     byte[] privateKeySerialized;
 
+    private HashMap<String, List<ChatMessage>> messages;
+
     private PrivateUserProfile userProfile;
     private EncryptedPrivateUserProfile encrypteduserProfile;
 
     public static boolean futurputSuccess = false;
 
 
+    Context context;
     public P2POverlay p2p;
     private List<FriendsListEntry> friendsList;
     public Queue<ChatMessage> messageQueue;
     private List<FriendRequestMessage> friendRequestsList;
     private ScheduledExecutorService scheduler;
     private CallHandler callHandler;
+
+    private HashMap<String, Boolean> hasNewMsg;
 
 
     private String currentChatPartner;
@@ -69,9 +75,23 @@ public class MainWindow {
         currentChatPartner = userID;
     }
 
-    public MainWindow(P2POverlay p2p) {
+    public MainWindow(P2POverlay p2p, Context context) {
         this.p2p = p2p;
+        this.context = context;
         messageQueue = new LinkedList();
+        messages = new HashMap<String, List<ChatMessage>>();
+        hasNewMsg = new HashMap<String, Boolean>();
+    }
+
+    public HashMap<String, List<ChatMessage>> getMessages() {
+        return messages;
+    }
+    public List<ChatMessage> getMessagesFrom(String userID) {
+        return messages.get(userID);
+    }
+
+    public void setMessages(HashMap<String, List<ChatMessage>> messages) {
+        this.messages = messages;
     }
 
 
@@ -414,21 +434,68 @@ public class MainWindow {
         p2p.sendNonBlocking(friendsListEntry.getPeerAddress(), ChatMessageJson, false);
     }
 
+    public void removeNewMsgAlert(String userID){
+            hasNewMsg.put(userID, false);
+    }
+    public boolean hasNewMsg(String userID){
+        if(hasNewMsg.containsKey(userID)){
+            return hasNewMsg.get(userID);
+        }
+        else{
+            return false;
+        }
+    }
+
 
     public void handleIncomingChatMessage(ChatMessage msg) {
         FriendsListEntry e = getFriendsListEntry(msg.getSenderUserID());
 
+
         // If friend is in friendslist
         if (e != null) {
+
+            hasNewMsg.put(msg.getSenderUserID(), true);
+
             log.info("Message received from: " + msg.getSenderUserID() + " Messagetext: " + msg.getMessageText());
-            log.info("offer msg to queueu");
+            log.info("current chat partner: " + currentChatPartner + "message userID: " + msg.getSenderUserID());
+
+
+                addMsgToHashMap(msg);
+
+
+
+
+
+
+
+/*            log.info("offer msg to queueu");
             messageQueue.offer(msg);
-            log.info("queueu: " + messageQueue.peek());
+            log.info("queueu: " + messageQueue.peek());*/
 
 
         } else {
             log.info("That's my purse, i don't know you!");
         }
+    }
+
+    public void addMsgToHashMap(ChatMessage msg){
+        if(messages.containsKey(msg.getSenderUserID())){
+            messages.get(msg.getSenderUserID()).add(msg);
+        }
+        else {
+            List<ChatMessage> newChat = new ArrayList<ChatMessage>();
+            newChat.add(msg);
+            messages.put(msg.getSenderUserID(), newChat);
+        }
+    }
+
+    public void addSelfMessageToChat(String userID, ChatMessage msg){
+        if(messages.containsKey(userID)){
+            messages.get(userID).add(msg);
+        }
+        List<ChatMessage> newChat = new ArrayList<ChatMessage>();
+        newChat.add(msg);
+        messages.put(userID, newChat);
     }
 
     public void register(String username, String password) {
@@ -619,7 +686,7 @@ public class MainWindow {
         final Runnable pinger = new Runnable() {
             public void run() {
                 System.out.println("pinged online to all friends");
-                pingAllOnlineFriends();
+                pingAllFriends(true);
             }
         };
         final ScheduledFuture<?> beeperHandle =

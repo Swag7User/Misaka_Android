@@ -59,7 +59,7 @@ public class ChatListAdapter extends BaseAdapter {
                 v = LayoutInflater.from(context).inflate(R.layout.chat_user1_item, null, false);
                 holder1 = new ViewHolder1();
 
-
+                holder1.senderTextView = (TextView) v.findViewById(R.id.chat_company_reply_author);
                 holder1.messageTextView = (TextView) v.findViewById(R.id.message_text);
                 holder1.timeTextView = (TextView) v.findViewById(R.id.time_text);
 
@@ -70,6 +70,7 @@ public class ChatListAdapter extends BaseAdapter {
 
             }
 
+            holder1.senderTextView.setText(message.getSenderUserID());
             holder1.messageTextView.setText(Emoji.replaceEmoji(message.getMessageText(), holder1.messageTextView.getPaint().getFontMetricsInt(), AndroidUtilities.dp(16)));
             holder1.timeTextView.setText(SIMPLE_DATE_FORMAT.format(message.getMessageTime()));
 
@@ -127,6 +128,7 @@ public class ChatListAdapter extends BaseAdapter {
     }
 
     private class ViewHolder1 {
+        public TextView senderTextView;
         public TextView messageTextView;
         public TextView timeTextView;
 

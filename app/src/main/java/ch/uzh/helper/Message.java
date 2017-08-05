@@ -5,6 +5,7 @@ import net.tomp2p.peers.PeerAddress;
 import java.io.Serializable;
 
 public abstract class Message implements Serializable {
+
     private String senderUserID;
     private PeerAddress senderPeerAddress;
     private String messageText;
@@ -34,6 +35,10 @@ public abstract class Message implements Serializable {
      */
     public String getSenderUserID() {
         return senderUserID;
+    }
+
+    public void setSenderUserID(String senderUserID) {
+        this.senderUserID = senderUserID;
     }
 
     /**

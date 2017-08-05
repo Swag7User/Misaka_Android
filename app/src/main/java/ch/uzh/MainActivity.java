@@ -37,9 +37,11 @@ public class MainActivity extends AppCompatActivity
 
     private final int REQUEST_PERMISSION_RECORD_AUDIO=1;
 
-    public void onClickCalled(String anyValue) {
-        log.info(anyValue);
-        mainWindow.setCurrentChatpartner(anyValue);
+    // click on a cardview of a friend
+    public void onClickCalled(String userID) {
+        log.info(userID);
+        mainWindow.setCurrentChatpartner(userID);
+        mainWindow.removeNewMsgAlert(userID);
         Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
         startActivity(intent);
     }

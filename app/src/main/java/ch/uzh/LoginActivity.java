@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity
         log.info("Bootstrapped to: " + bootstrapIP
                 + "My IP: " + p2p.getPeerAddress().inetAddress().getHostAddress());
 
-        mainWindow = new MainWindow(p2p);
+        mainWindow = new MainWindow(p2p, this);
         GlobalState state = ((GlobalState) getApplicationContext());
         state.setMainWindow(mainWindow);
 

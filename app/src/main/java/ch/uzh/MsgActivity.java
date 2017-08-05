@@ -61,6 +61,8 @@ public class MsgActivity extends AppCompatActivity
     private int keyboardHeight;
     private boolean keyboardVisible;
     private WindowManager.LayoutParams windowLayoutParams;
+    int sizeOfMessageListOnCreate;
+
 
     boolean isRecording = false;
     AudioManager am = null;
@@ -108,6 +110,7 @@ public class MsgActivity extends AppCompatActivity
 
         }
     };
+
 
     private final TextWatcher watcher1 = new TextWatcher() {
         @Override
@@ -196,33 +199,49 @@ public class MsgActivity extends AppCompatActivity
 
         NotificationCenter.getInstance().addObserver(this, NotificationCenter.emojiDidLoaded);
 
+        sizeOfMessageListOnCreate = mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size();
+        log.info("CurrentChatPartner: " + mainWindow.getCurrentChatpartner());
+        log.info("sizeOfMessageListOnCreate: " + mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size());
+
+
+        for(ChatMessage msg : mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner())){
+            String messageText = msg.getMessageText();
+            if (messageText.trim().length() == 0) {
+                log.info("message too short");
+                return;
+            }
+            ChatMessage message = new ChatMessage();
+            message.setMessageStatus(Status.SENT);
+            message.setMessageText(messageText);
+            message.setSenderUserID(msg.getSenderUserID());
+            message.setUserType(UserType.SELF);
+            message.setMessageTime(new Date().getTime());
+
+            chatMessages.add(message);
+
+        }
+        if (listAdapter != null) {
+            listAdapter.notifyDataSetChanged();
+            scrollMyListViewToBottom();
+            log.info("notifyDataSetChanged");
+
+        }
+
         Handler h = new Handler();
         int delay = 1000; //milliseconds
 
         h.postDelayed( new Runnable() {
             public void run() {
                 log.info("updated messages");
-                while (true){
-                    ChatMessage msg;
                     try{
-                        msg = mainWindow.messageQueue.remove();
+                        if(mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size() > sizeOfMessageListOnCreate){
+                            receiveNewMsg();
+                        }
                         log.info("1");
 
                     } catch(Exception e) {
                         log.info("2");
-
-                        break;
                     }
-                    if (msg == null){
-                        log.info("3");
-
-                        break;
-                    }else{
-                        log.info("4");
-
-                        receiveMsg(msg.getMessageText());
-                    }
-                }
                 h.postDelayed(this, 2000);
             }
         }, delay);
@@ -243,9 +262,31 @@ public class MsgActivity extends AppCompatActivity
             }
         }).start();
 
+    }
 
+    private void receiveNewMsg(){
+        for(int i = sizeOfMessageListOnCreate ; i < mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size() ; i++){
 
+            String messageText = mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).get(i).getMessageText();
+            if (messageText.trim().length() == 0)
+                return;
 
+            ChatMessage message = new ChatMessage();
+            message.setMessageStatus(Status.SENT);
+            message.setMessageText(messageText);
+            message.setSenderUserID(mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).get(i).getSenderUserID());
+            message.setUserType(UserType.SELF);
+            message.setMessageTime(new Date().getTime());
+
+            chatMessages.add(message);
+
+            if (listAdapter != null) {
+                listAdapter.notifyDataSetChanged();
+                scrollMyListViewToBottom();
+                log.info("notifyDataSetChanged");
+
+            }
+        }
     }
 
     private void initRecordAndTrack()
@@ -292,10 +333,7 @@ public class MsgActivity extends AppCompatActivity
         isRecording = false;
     }
 
-    private void sendMessage(final String messageText, final UserType userType) {
-        if (messageText.trim().length() == 0)
-            return;
-
+    private void addSelfBubble(final String messageText, final UserType userType){
         ChatMessage message = new ChatMessage();
         message.setMessageStatus(Status.SENT);
         message.setMessageText(messageText);
@@ -308,6 +346,26 @@ public class MsgActivity extends AppCompatActivity
             listAdapter.notifyDataSetChanged();
             scrollMyListViewToBottom();
         }
+
+    }
+
+    private void sendMessage(final String messageText, final UserType userType) {
+        if (messageText.trim().length() == 0)
+            return;
+
+            ChatMessage message = new ChatMessage();
+            message.setMessageStatus(Status.SENT);
+            message.setMessageText(messageText);
+            message.setUserType(userType);
+            message.setMessageTime(new Date().getTime());
+            chatMessages.add(message);
+            mainWindow.addSelfMessageToChat(mainWindow.getCurrentChatpartner(), message);
+
+
+            if (listAdapter != null) {
+                listAdapter.notifyDataSetChanged();
+                scrollMyListViewToBottom();
+            }
 
         mainWindow.sendChatMessage(messageText, mainWindow.getFriendsListEntry(mainWindow.getCurrentChatpartner()));
 
@@ -583,6 +641,8 @@ public class MsgActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mainWindow.removeNewMsgAlert(mainWindow.getCurrentChatpartner());
+        chatMessages = new ArrayList<>();
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
