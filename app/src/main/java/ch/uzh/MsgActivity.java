@@ -199,32 +199,36 @@ public class MsgActivity extends AppCompatActivity
 
         NotificationCenter.getInstance().addObserver(this, NotificationCenter.emojiDidLoaded);
 
-        sizeOfMessageListOnCreate = mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size();
-        log.info("CurrentChatPartner: " + mainWindow.getCurrentChatpartner());
-        log.info("sizeOfMessageListOnCreate: " + mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size());
+        try {
+            sizeOfMessageListOnCreate = mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size();
+            log.info("CurrentChatPartner: " + mainWindow.getCurrentChatpartner());
+            log.info("sizeOfMessageListOnCreate: " + mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size());
 
 
-        for(ChatMessage msg : mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner())){
-            String messageText = msg.getMessageText();
-            if (messageText.trim().length() == 0) {
-                log.info("message too short");
-                return;
+            for (ChatMessage msg : mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner())) {
+                String messageText = msg.getMessageText();
+                if (messageText.trim().length() == 0) {
+                    log.info("message too short");
+                    return;
+                }
+                ChatMessage message = new ChatMessage();
+                message.setMessageStatus(Status.SENT);
+                message.setMessageText(messageText);
+                message.setSenderUserID(msg.getSenderUserID());
+                message.setUserType(UserType.SELF);
+                message.setMessageTime(new Date().getTime());
+
+                chatMessages.add(message);
+
             }
-            ChatMessage message = new ChatMessage();
-            message.setMessageStatus(Status.SENT);
-            message.setMessageText(messageText);
-            message.setSenderUserID(msg.getSenderUserID());
-            message.setUserType(UserType.SELF);
-            message.setMessageTime(new Date().getTime());
+            if (listAdapter != null) {
+                listAdapter.notifyDataSetChanged();
+                scrollMyListViewToBottom();
+                log.info("notifyDataSetChanged");
 
-            chatMessages.add(message);
-
-        }
-        if (listAdapter != null) {
-            listAdapter.notifyDataSetChanged();
-            scrollMyListViewToBottom();
-            log.info("notifyDataSetChanged");
-
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
 
         Handler h = new Handler();
