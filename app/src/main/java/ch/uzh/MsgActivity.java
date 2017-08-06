@@ -704,7 +704,7 @@ public class MsgActivity extends AppCompatActivity
 
 
         } else if (id == R.id.nav_manage) {
-            Intent intent = new Intent(getApplicationContext(), CamActivity.class);
+            Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
             startActivity(intent);
 
 

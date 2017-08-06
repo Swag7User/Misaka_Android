@@ -1,6 +1,8 @@
 package ch.uzh;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Pair;
 import ch.uzh.helper.*;
 import com.google.gson.Gson;
@@ -21,6 +23,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
@@ -38,6 +41,7 @@ public class MainWindow {
     private String username;
     private String password;
     private boolean bootstrapNode;
+    private Queue<Bitmap> bitmapframes;
 
     Key publicKey;
     Key privateKey;
@@ -53,7 +57,7 @@ public class MainWindow {
     public static boolean futurputSuccess = false;
 
 
-    Context context;
+    public static Context context;
     public P2POverlay p2p;
     private List<FriendsListEntry> friendsList;
     public Queue<ChatMessage> messageQueue;
@@ -81,6 +85,12 @@ public class MainWindow {
         messageQueue = new LinkedList();
         messages = new HashMap<String, List<ChatMessage>>();
         hasNewMsg = new HashMap<String, Boolean>();
+        bitmapframes = new LinkedBlockingQueue<Bitmap>();
+
+    }
+
+    public static void setMainContext(Context context){
+        MainWindow.context = context;
     }
 
     public HashMap<String, List<ChatMessage>> getMessages() {
@@ -579,6 +589,18 @@ public class MainWindow {
             log.info("Network DHT error. Could not save public UserProfile");
             return new Pair<>(false, "Network DHT error. Could not save public UserProfile");
         }
+    }
+
+    public void handleIncomingVideoFrame(VideoFrame vidFrame){
+        log.info("VideoFrame handling beegins now: ");
+        Bitmap bMap = BitmapFactory.decodeByteArray(vidFrame.getData(), 0, vidFrame.getData().length);
+        bitmapframes.offer(bMap);
+        //((CameraActivity)context).showVideo(vidFrame);
+
+    }
+
+    public Queue<Bitmap> getVideoFrameQueue(){
+        return bitmapframes;
     }
 
     public void loginR(String username, String password, final int id, final String ip) {

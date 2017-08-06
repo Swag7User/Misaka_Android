@@ -105,7 +105,7 @@ public class LoginActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        String bootstrapIP = "192.168.1.15";
+        String bootstrapIP = "192.168.1.47";
         System.setProperty("java.net.preferIPv6Addresses", "false");
         p2p = new P2POverlay();
 
