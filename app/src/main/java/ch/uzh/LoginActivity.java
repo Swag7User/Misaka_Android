@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity
         passwordField = (EditText) findViewById(R.id.passwordEditText);
         errorLable = (TextView) findViewById(R.id.errorLable);
 
-        FloatingActionButton fabLog = (FloatingActionButton) findViewById(R.id.fabLog);
+/*        FloatingActionButton fabLog = (FloatingActionButton) findViewById(R.id.fabLog);
         fabLog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,22 +76,33 @@ public class LoginActivity extends AppCompatActivity
 
 
             }
-        });
+        });*/
 
         Button loginbtn = (Button) findViewById(R.id.loginbutton);
         loginbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                log.info("clicked the REAL login button");
-                if (loginCheck() == false) {
-                    log.info("LOGINCHECK FALSE");
-                    return;
+                if (mainWindow.existsUser(usernameField.getText().toString())) {
+
+                    log.info("clicked the REAL login button");
+                    if (loginCheck() == false) {
+                        log.info("LOGINCHECK FALSE");
+                        return;
+                    } else {
+                        int id = getId();
+                        login(id, null);
+                    }
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
                 } else {
-                    int id = getId();
-                    login(id, null);
+                    if (loginCheck() == false) {
+                        return;
+                    } else {
+                        reg();
+                    }
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
                 }
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
 
 
             }
@@ -105,15 +116,17 @@ public class LoginActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        String bootstrapIP = "192.168.1.15";
+        String bootstrapIP = "192.168.1.47";
         System.setProperty("java.net.preferIPv6Addresses", "false");
         p2p = new P2POverlay();
+
+        errorLable.setAlpha(0.0f);
 
         // Try to bootstrap yay
         Pair<Boolean, String> result = p2p.bootstrap(bootstrapIP);
         if (result.first == false) {
             log.info("Aw shit, didn't work\n");
-        } else{
+        } else {
             log.info("it's AWRIGHT\n");
         }
 
@@ -123,7 +136,6 @@ public class LoginActivity extends AppCompatActivity
         mainWindow = new MainWindow(p2p, this);
         GlobalState state = ((GlobalState) getApplicationContext());
         state.setMainWindow(mainWindow);
-
 
 
     }
@@ -143,7 +155,6 @@ public class LoginActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
-
 
 
     public boolean loginCheck() {
@@ -233,17 +244,9 @@ public class LoginActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.network) {
-
-        } else if (id == R.id.nav_slideshow) {
+        if (id == R.id.network) {
 
         } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 
@@ -251,6 +254,7 @@ public class LoginActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
     private int getId() {
         int id = ((Long) System.currentTimeMillis()).intValue();
         return id;

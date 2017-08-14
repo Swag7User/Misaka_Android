@@ -83,6 +83,14 @@ public class ObjectReplyHandler implements ObjectDataReply {
                 }
             };            r.run();
 
+        } else if (identifier.equals("VideoFrame")) {
+            log.info("~~~~~~~~~~~~~~~videoframe handling~~~~~~~~~~~~~");
+            final Runnable r = new Runnable() {
+                public void run() {
+                    mainWindow.handleIncomingVideoFrame(gsonReply.fromJson(jsonReply, VideoFrame.class));
+                }
+            };            r.run();
+
         } else {
             log.info("~~~~~~~~~~~~~~~all has failed~~~~~~~~~~~~~");
 

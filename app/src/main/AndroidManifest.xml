@@ -42,6 +42,10 @@
                 android:label="@string/app_name"
                 android:name="ch.uzh.CamActivity"
                 android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+                android:name="ch.uzh.CameraActivity"
+                android:label="@string/app_name">
+        </activity>
     </application>
 
 </manifest>

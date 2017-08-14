@@ -199,32 +199,36 @@ public class MsgActivity extends AppCompatActivity
 
         NotificationCenter.getInstance().addObserver(this, NotificationCenter.emojiDidLoaded);
 
-        sizeOfMessageListOnCreate = mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size();
-        log.info("CurrentChatPartner: " + mainWindow.getCurrentChatpartner());
-        log.info("sizeOfMessageListOnCreate: " + mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size());
+        try {
+            sizeOfMessageListOnCreate = mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size();
+            log.info("CurrentChatPartner: " + mainWindow.getCurrentChatpartner());
+            log.info("sizeOfMessageListOnCreate: " + mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner()).size());
 
 
-        for(ChatMessage msg : mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner())){
-            String messageText = msg.getMessageText();
-            if (messageText.trim().length() == 0) {
-                log.info("message too short");
-                return;
+            for (ChatMessage msg : mainWindow.getMessagesFrom(mainWindow.getCurrentChatpartner())) {
+                String messageText = msg.getMessageText();
+                if (messageText.trim().length() == 0) {
+                    log.info("message too short");
+                    return;
+                }
+                ChatMessage message = new ChatMessage();
+                message.setMessageStatus(Status.SENT);
+                message.setMessageText(messageText);
+                message.setSenderUserID(msg.getSenderUserID());
+                message.setUserType(UserType.SELF);
+                message.setMessageTime(new Date().getTime());
+
+                chatMessages.add(message);
+
             }
-            ChatMessage message = new ChatMessage();
-            message.setMessageStatus(Status.SENT);
-            message.setMessageText(messageText);
-            message.setSenderUserID(msg.getSenderUserID());
-            message.setUserType(UserType.SELF);
-            message.setMessageTime(new Date().getTime());
+            if (listAdapter != null) {
+                listAdapter.notifyDataSetChanged();
+                scrollMyListViewToBottom();
+                log.info("notifyDataSetChanged");
 
-            chatMessages.add(message);
-
-        }
-        if (listAdapter != null) {
-            listAdapter.notifyDataSetChanged();
-            scrollMyListViewToBottom();
-            log.info("notifyDataSetChanged");
-
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
 
         Handler h = new Handler();
@@ -680,43 +684,10 @@ public class MsgActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            mainWindow.startTransmitting();
-        } else if (id == R.id.nav_gallery)
-        {
-            mainWindow.stopTransmitting();
 
-
-        } else if (id == R.id.nav_slideshow) {
-
-            Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
-
-            if (result.first == true) {
-                log.info("friend request sent to myself");
-            } else {
-                log.info("friend request ERROR");
-            }
-
-
-        } else if (id == R.id.nav_manage) {
-            Intent intent = new Intent(getApplicationContext(), CamActivity.class);
+         if (id == R.id.nav_manage) {
+            Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
             startActivity(intent);
-
-
-        } else if (id == R.id.nav_share) {
-            if (!isRecording)
-            {
-                startRecordAndPlay();
-            }
-
-        } else if (id == R.id.nav_send) {
-
-            if (isRecording)
-            {
-                stopRecordAndPlay();
-                log.info("stopped recording");
-            }
 
         }
 

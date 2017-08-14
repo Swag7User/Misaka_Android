@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EdgeEffect;
 import android.widget.EditText;
+import android.widget.TextView;
 import ch.uzh.helper.FriendsListEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ public class AddActivity extends AppCompatActivity
 
     public MainWindow mainWindow;
     private EditText searchField;
+    private TextView errorLableAdd;
 
     public void onClickCalled(String anyValue) {
         log.info(anyValue);
@@ -48,6 +50,8 @@ public class AddActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         Button button = (Button) findViewById(R.id.searchbutton);
+        errorLableAdd = (TextView) findViewById(R.id.errorLableAdd);
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,6 +69,8 @@ public class AddActivity extends AppCompatActivity
 
             }
         });
+
+        errorLableAdd.setAlpha(0.0f);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -123,42 +129,7 @@ public class AddActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
 
-            String s = "misaka";
-            Pair<Boolean, String> result = mainWindow.sendFriendRequest(s, "hi, pls accept");
-            log.info("I SENT THSI SHIT YO: " + "misaka " + "hi, pls accept");
-
-            if (result.first == true) {
-                log.info("friend request sent");
-            } else {
-                log.info("friend request ERROR");
-            }
-
-
-        } else if (id == R.id.nav_slideshow) {
-
-            Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
-
-            if (result.first == true) {
-                log.info("friend request sent to myself");
-            } else {
-                log.info("friend request ERROR");
-            }
-
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-            Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
-            startActivity(intent);
-
-        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

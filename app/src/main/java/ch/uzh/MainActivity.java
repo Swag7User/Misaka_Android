@@ -193,36 +193,14 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-
-            mainWindow.savePrivateUserProfileNonBlocking();
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+ if (id == R.id.nav_gallery) {
 
             Intent intent = new Intent(getApplicationContext(), AddActivity.class);
             startActivity(intent);
 
 
-        } else if (id == R.id.nav_slideshow) {
-
-            Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
-
-            if (result.first == true) {
-                log.info("friend request sent to myself");
-            } else {
-                log.info("friend request ERROR");
-            }
-
-
-        } else if (id == R.id.nav_manage) {
+        }  else if (id == R.id.nav_manage) {
             friendListAdapter.notifyDataSetChanged();
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-            Intent intent = new Intent(getApplicationContext(), MsgActivity.class);
-            startActivity(intent);
 
         }
 
