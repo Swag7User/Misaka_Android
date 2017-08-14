@@ -32,7 +32,7 @@ public class CamActivity extends AppCompatActivity
 
     public MainWindow mainWindow;
 
-    private final int REQUEST_PERMISSION_CAMERA=1;
+    private final int REQUEST_PERMISSION_CAMERA = 1;
 
     private Camera mCamera;
     private CameraPreview mPreview;
@@ -282,22 +282,14 @@ public class CamActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_gallery) {
 
             Intent intent = new Intent(getApplicationContext(), AddActivity.class);
             startActivity(intent);
 
 
-        } else if (id == R.id.nav_slideshow) {
-
-
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 

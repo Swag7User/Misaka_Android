@@ -684,43 +684,10 @@ public class MsgActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            mainWindow.startTransmitting();
-        } else if (id == R.id.nav_gallery)
-        {
-            mainWindow.stopTransmitting();
 
-
-        } else if (id == R.id.nav_slideshow) {
-
-            Pair<Boolean, String> result = mainWindow.sendFriendRequest("mikoto", "hi, pls accept");
-            log.info("I SENT THSI SHIT TO ME??? YO: " + "misaka " + "hi, pls accept");
-
-            if (result.first == true) {
-                log.info("friend request sent to myself");
-            } else {
-                log.info("friend request ERROR");
-            }
-
-
-        } else if (id == R.id.nav_manage) {
+         if (id == R.id.nav_manage) {
             Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
             startActivity(intent);
-
-
-        } else if (id == R.id.nav_share) {
-            if (!isRecording)
-            {
-                startRecordAndPlay();
-            }
-
-        } else if (id == R.id.nav_send) {
-
-            if (isRecording)
-            {
-                stopRecordAndPlay();
-                log.info("stopped recording");
-            }
 
         }
 
